@@ -1,0 +1,85 @@
+.map1-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  pointer-events: auto;
+  z-index: 20;
+  opacity: 1;
+}
+
+/* Map1 overlay - synchronized with world map timing (1s delay + 1.5s fade) */
+.map1-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  animation: fadeInMapOverlay 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1s forwards;
+  z-index: 2;
+}
+
+@keyframes fadeInMapOverlay {
+  from {
+    opacity: 0;
+    transform: scale(1.02);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.map1-text-bubble {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255,255,255,0.35);
+  padding: 36px 48px;
+  border-radius: 40px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  max-width: 700px;
+  text-align: center;
+  font-size: 1.6rem;
+  font-weight: 500;
+  color: #333;
+  z-index: 21;
+  opacity: 0;
+  animation: fadeInMapText 1.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1s forwards;
+}
+
+@keyframes fadeInMapText {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -35%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* INSTANT fade-out when advancing - overrides keyframe animation */
+.map1-container.advancing .map1-overlay {
+  opacity: 0 !important;
+  transition: opacity 2s ease-out 2s !important;
+}
+
+.map1-container.advancing .map1-text-bubble {
+  animation: slideUpAndExit 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards !important;
+}
+
+@keyframes slideUpAndExit {
+  0% { transform: translate(-50%, -50%); opacity: 1; }
+  100% { transform: translate(-50%, -300%); opacity: 0; }
+}
+
+.highlight {
+  color: #FF395C;
+  font-weight: bold;
+}

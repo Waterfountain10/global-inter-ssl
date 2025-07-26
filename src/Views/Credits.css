@@ -1,0 +1,287 @@
+.credits-container {
+  position: fixed; /* Fixed positioning for smooth slide-up */
+  top: 0;
+  left: 0;
+  background: #EEEEEE;
+  width: 100%;
+  height: 100vh;
+  z-index: 50; /* Maximum priority above everything */
+  padding: 120px 0 80px;
+  font-family: 'Montserrat', 'Helvetica Neue', sans-serif;
+  overflow-y: auto; /* Allow scrolling within credits */
+  /* Initial state: positioned below viewport */
+  transform: translateY(100vh);
+  transition: transform 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.credits-container.visible {
+  /* Slide up into view with smooth transition */
+  transform: translateY(0);
+}
+
+.credits-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 60px 48px;
+  position: relative;
+  z-index: 51; /* Above container */
+  background: #FFFFFF; /* Strong white background for maximum contrast */
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1); /* Added shadow for depth */
+  /* Initial content state - slightly scaled down */
+  transform: scale(0.95);
+  opacity: 0;
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.6s; /* Delayed for sequential animation */
+}
+
+/* Content appears after container slide-up */
+.credits-container.visible .credits-content {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.credits-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 80px;
+  margin-bottom: 80px;
+}
+
+.credits-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.credits-heading {
+  font-size: 2.5rem !important;
+  font-weight: 900 !important;
+  color: #000000 !important; /* Maximum contrast black */
+  margin-bottom: 32px !important;
+  letter-spacing: -1px !important;
+  font-family: 'Montserrat', 'Helvetica Neue', sans-serif !important;
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8) !important; /* White text shadow for extra visibility */
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.credits-text {
+  font-size: 1rem !important;
+  line-height: 1.6 !important;
+  color: #000000 !important; /* Maximum contrast black */
+  margin-bottom: 20px !important;
+  font-weight: 400 !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Team Section Styles */
+.team-org {
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  color: #000000 !important;
+  margin: 32px 0 16px 0 !important;
+  letter-spacing: -0.5px !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.team-org:first-of-type {
+  margin-top: 0 !important;
+}
+
+.team-member {
+  display: flex !important;
+  flex-direction: column !important;
+  margin-bottom: 12px !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.member-name {
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  color: #000000 !important;
+  line-height: 1.3 !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.member-role {
+  font-size: 0.9rem !important;
+  color: #666666 !important;
+  font-weight: 400 !important;
+  margin-top: 2px !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Publications Section Styles */
+.publication-authors {
+  font-size: 1rem !important;
+  color: #000000 !important;
+  margin-bottom: 8px !important;
+  line-height: 1.5 !important;
+  font-weight: 400 !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.publication-title {
+  font-size: 1rem !important;
+  color: #FF395C !important;
+  text-decoration: underline !important;
+  margin-bottom: 8px !important;
+  display: block !important;
+  line-height: 1.4 !important;
+  font-weight: 500 !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.publication-title:hover {
+  color: #e62e50 !important;
+}
+
+.publication-venue {
+  font-size: 1rem !important;
+  color: #000000 !important;
+  font-weight: 600 !important;
+  margin-bottom: 40px !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.press-heading {
+  margin-top: 40px !important;
+}
+
+.press-download {
+  font-size: 1rem !important;
+  color: #FF395C !important;
+  text-decoration: underline !important;
+  margin-bottom: 16px !important;
+  display: block !important;
+  font-weight: 500 !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.press-download:hover {
+  color: #e62e50 !important;
+}
+
+.press-usage {
+  font-size: 1rem !important;
+  color: #000000 !important;
+  margin-bottom: 12px !important;
+  line-height: 1.5 !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.press-conditions {
+  padding-left: 20px !important;
+  margin: 0 !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.press-conditions li {
+  font-size: 1rem !important;
+  color: #000000 !important;
+  margin-bottom: 8px !important;
+  line-height: 1.5 !important;
+  display: list-item !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Contact Section Styles - Single Column Layout */
+.contact-section {
+  display: flex;
+  flex-direction: column;
+  border-top: 2px solid #ddd;
+  padding-top: 40px;
+}
+
+.contact-info {
+  width: 100%;
+}
+
+.contact-label {
+  font-size: 1rem;
+  color: #333333;
+  margin-bottom: 8px;
+}
+
+.contact-email {
+  font-size: 1rem;
+  color: #FF395C;
+  text-decoration: none;
+  font-weight: 500;
+  margin-bottom: 40px;
+  display: block;
+}
+
+.contact-email:hover {
+  text-decoration: underline;
+  color: #e62e50;
+}
+
+.lab-logo {
+  margin-bottom: 16px;
+}
+
+.lab-logo img {
+  height: 60px;
+  margin-bottom: 0;
+}
+
+.accessibility-link {
+  font-size: 0.9rem;
+  color: #999999;
+  text-decoration: none;
+}
+
+.accessibility-link:hover {
+  text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .credits-grid {
+    grid-template-columns: 1fr;
+    gap: 60px;
+  }
+  
+  .credits-content {
+    padding: 0 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .credits-container {
+    padding: 80px 0 60px;
+  }
+  
+  .credits-content {
+    padding: 0 24px;
+  }
+  
+  .credits-heading {
+    font-size: 2rem;
+  }
+  
+  .credits-grid {
+    gap: 40px;
+  }
+}

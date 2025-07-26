@@ -1,0 +1,78 @@
+.map6-container {
+  position: fixed; /* Match previous maps' positioning for overlay */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 25; /* Above persistent world map background (15) and all other maps */
+}
+
+/* Map6 specific overlay - smooth fade-in transition */
+.map6-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.3s !important;
+  z-index: 2; /* above world map background, below text */
+}
+
+.map6-text-bubble {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255,255,255,0.35);
+  padding: 36px 48px;
+  border-radius: 40px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  max-width: 700px;
+  text-align: center;
+  font-size: 1.6rem;
+  font-weight: 500;
+  color: #333;
+  opacity: 0;
+  transition: opacity 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.5s !important;
+  z-index: 30; /* highest layer - above everything including world map */
+}
+
+/* Visible state triggers fade-in of Map6 elements */
+.map6-container.visible .map6-overlay {
+  opacity: 1;
+}
+
+.map6-container.visible .map6-text-bubble {
+  opacity: 1;
+}
+
+/* Map6 is the final state - no advancing animation needed, but keep for consistency */
+.map6-container.advancing .map6-text-bubble {
+  animation: slideUpAndExit 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards !important;
+}
+
+@keyframes slideUpAndExit {
+  0% {
+    transform: translate(-50%, -50%);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -300%);
+    opacity: 0;
+  }
+}
+
+/* Map6 overlay fade-out when advancing to credits */
+.map6-container.advancing .map6-overlay {
+  opacity: 0;
+  transition: opacity 2s ease-in-out !important;
+}
+
+.highlight {
+  color: #FF395C;
+  font-weight: bold;
+}
