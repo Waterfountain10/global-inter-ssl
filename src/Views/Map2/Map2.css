@@ -1,78 +1,74 @@
 .map2-container {
-  position: fixed; /* Match Map1's positioning for immediate overlay */
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
-  overflow: hidden;
-  pointer-events: auto; /* Enable pointer events for scroll detection */
-  z-index: 19; /* Just below Map1's z-index of 20 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 19; /* below Map1 (20) above Map3 (18) */
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
 }
 
-/* Map2 specific overlay - fades in above persistent world map background */
+.map2-container.visible {
+    opacity: 1;
+}
+
 .map2-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  transition: opacity 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
-  z-index: 2; /* above world map background, below text */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 1;
 }
 
 .map2-text-bubble {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(255,255,255,0.35);
-  padding: 36px 48px;
-  border-radius: 40px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-  max-width: 700px;
-  text-align: center;
-  font-size: 1.6rem;
-  font-weight: 500;
-  color: #333;
-  opacity: 0;
-  transition: opacity 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
-  z-index: 21; /* highest layer */
-}
-
-/* Visible state triggers fade-in of Map2 elements */
-.map2-container.visible .map2-overlay {
-  opacity: 1;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.35);
+    padding: 36px 48px;
+    border-radius: 40px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    max-width: 700px;
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: #333;
+    z-index: 21;
+    opacity: 0;
+    transition: opacity 1s ease-in-out 0.3s;
 }
 
 .map2-container.visible .map2-text-bubble {
-  opacity: 1;
+    opacity: 1;
 }
 
-/* Advancing state: text slides up and map2 overlay fades out */
 .map2-container.advancing .map2-text-bubble {
-  animation: slideUpAndExit 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards !important;
+    animation: slideUpAndExit 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.map2-container.advancing .map2-overlay {
+    opacity: 0;
+    transition: opacity 1.5s ease-in-out;
 }
 
 @keyframes slideUpAndExit {
-  0% {
-    transform: translate(-50%, -50%);
-    opacity: 1;
-  }
-  100% {
-    transform: translate(-50%, -300%);
-    opacity: 0;
-  }
-}
-
-/* Map2 overlay fades out when advancing, persistent world map handled by HomePage */
-.map2-container.advancing .map2-overlay {
-  opacity: 0;
-  transition: opacity 2s ease-in-out !important;
+    0% {
+        transform: translate(-50%, -50%);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -300%);
+        opacity: 0;
+    }
 }
 
 .highlight {
-  color: #FF395C;
-  font-weight: bold;
+    color: #ff395c;
+    font-weight: bold;
 }

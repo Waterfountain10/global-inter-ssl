@@ -1,78 +1,75 @@
+//
+
 .map4-container {
-  position: fixed; /* Match previous maps' positioning for overlay */
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 16; /* Above world map (15), below Map3 (18) to prevent conflicts */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 17; /* below Map2, above Map4 */
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
 }
 
-/* Map4 specific overlay - smooth fade-in transition */
+.map4-container.visible {
+    opacity: 1;
+}
+
 .map4-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  transition: opacity 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.3s !important;
-  z-index: 2; /* above world map background, below text */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 1;
 }
 
 .map4-text-bubble {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(255,255,255,0.35);
-  padding: 36px 48px;
-  border-radius: 40px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-  max-width: 700px;
-  text-align: center;
-  font-size: 1.6rem;
-  font-weight: 500;
-  color: #333;
-  opacity: 0;
-  transition: opacity 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.5s !important;
-  z-index: 21; /* highest layer */
-}
-
-/* Visible state triggers fade-in of Map4 elements */
-.map4-container.visible .map4-overlay {
-  opacity: 1;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.35);
+    padding: 36px 48px;
+    border-radius: 40px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    max-width: 700px;
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: #333;
+    opacity: 0;
+    transition: opacity 1s ease-in-out 0.3s;
 }
 
 .map4-container.visible .map4-text-bubble {
-  opacity: 1;
+    opacity: 1;
 }
 
-/* Advancing state: text slides up and map4 overlay fades out */
 .map4-container.advancing .map4-text-bubble {
-  animation: slideUpAndExit 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards !important;
+    animation: slideUpAndExit 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.map4-container.advancing .map4-overlay {
+    opacity: 0;
+    transition: opacity 1.5s ease-in-out;
 }
 
 @keyframes slideUpAndExit {
-  0% {
-    transform: translate(-50%, -50%);
-    opacity: 1;
-  }
-  100% {
-    transform: translate(-50%, -300%);
-    opacity: 0;
-  }
-}
-
-/* Map4 overlay fades out when advancing, persistent world map handled by HomePage */
-.map4-container.advancing .map4-overlay {
-  opacity: 0;
-  transition: opacity 2s ease-in-out !important;
+    0% {
+        transform: translate(-50%, -50%);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -300%);
+        opacity: 0;
+    }
 }
 
 .highlight {
-  color: #FF395C;
-  font-weight: bold;
+    color: #ff395c;
+    font-weight: bold;
 }
