@@ -332,33 +332,6 @@ export default function ResearchQuestion() {
         </div>
       )}
 
-      {/* Debug info */}
-      <div
-        style={{
-          position: "fixed",
-          top: "10px",
-          right: "10px",
-          background: "rgba(0,0,0,0.8)",
-          color: "white",
-          padding: "12px",
-          borderRadius: "8px",
-          fontSize: "11px",
-          zIndex: 10002,
-          fontFamily: "monospace",
-        }}
-      >
-        <div>Visible: {isVisible ? "YES" : "NO"}</div>
-        <div>Show Bar: {showSearchBar ? "YES" : "NO"}</div>
-        <div>Search State: {searchBarState}</div>
-        <div>Container Mode: {containerMode}</div>
-        <div>Scroll Progress: {Math.round(scrollProgress * 100)}%</div>
-        <div>Complete: {isComplete ? "YES" : "NO"}</div>
-        <div>Scroll Y: {Math.round(window.pageYOffset)}px</div>
-        <div>
-          Chars: {getTypedText().length}/{fullText.length}
-        </div>
-      </div>
-
       {/* CSS for animations */}
       <style>{`
         @keyframes blink {

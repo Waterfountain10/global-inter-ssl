@@ -137,34 +137,6 @@ const TopFold = ({ onScrollTrigger }) => {
           <div className="scroll-hint-dot"></div>
         </div>
       )}
-
-      {/* Debug button for testing */}
-      {isReady && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            console.log("🔴 Debug button clicked");
-            handleScrollTrigger();
-          }}
-          style={{
-            position: "absolute",
-            bottom: "200px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            padding: "15px 30px",
-            background: "#FF395C",
-            color: "white",
-            border: "none",
-            borderRadius: "25px",
-            cursor: "pointer",
-            fontSize: "16px",
-            zIndex: 1000,
-            fontWeight: "bold",
-          }}
-        >
-          DEBUG TRIGGER
-        </button>
-      )}
     </section>
   );
 };
