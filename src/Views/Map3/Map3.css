@@ -1,78 +1,87 @@
 .map3-container {
-  position: fixed; /* Match previous maps' positioning for overlay */
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 18; /* Below Map2's z-index of 19 */
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    pointer-events: auto;
 }
 
-/* Map3 specific overlay - fades in above persistent world map background */
+/* Scroll-driven container states */
+.map3-container.scroll-driven {
+    will-change: opacity;
+}
+
+.map3-container.active {
+    z-index: 25;
+}
+
+/* Map3 overlay - optimized for scroll performance */
 .map3-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  transition: opacity 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
-  z-index: 2; /* above world map background, below text */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 2;
+    will-change: opacity, transform;
+}
+
+/* Remove static animations in favor of scroll-driven ones */
+.map3-overlay.scroll-responsive {
+    animation: none;
 }
 
 .map3-text-bubble {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(255,255,255,0.35);
-  padding: 36px 48px;
-  border-radius: 40px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-  max-width: 700px;
-  text-align: center;
-  font-size: 1.6rem;
-  font-weight: 500;
-  color: #333;
-  opacity: 0;
-  transition: opacity 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
-  z-index: 21; /* highest layer */
-}
-
-/* Visible state triggers fade-in of Map3 elements */
-.map3-container.visible .map3-overlay {
-  opacity: 1;
-}
-
-.map3-container.visible .map3-text-bubble {
-  opacity: 1;
-}
-
-/* Advancing state: text slides up and map3 overlay fades out */
-.map3-container.advancing .map3-text-bubble {
-  animation: slideUpAndExit 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards !important;
-}
-
-@keyframes slideUpAndExit {
-  0% {
+    position: absolute;
+    top: 50%;
+    left: 50%;
     transform: translate(-50%, -50%);
-    opacity: 1;
-  }
-  100% {
-    transform: translate(-50%, -300%);
-    opacity: 0;
-  }
+    background: rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 36px 48px;
+    border-radius: 40px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    max-width: 700px;
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: #333;
+    z-index: 21;
+    will-change: opacity, transform;
 }
 
-/* Map3 overlay fades out when advancing, persistent world map handled by HomePage */
-.map3-container.advancing .map3-overlay {
-  opacity: 0;
-  transition: opacity 2s ease-in-out !important;
+/* Remove static animations for scroll-responsive elements */
+.map3-text-bubble.scroll-responsive {
+    animation: none;
 }
 
+/* Enhanced highlight for better readability */
 .highlight {
-  color: #FF395C;
-  font-weight: bold;
+    color: #ff395c;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(255, 57, 92, 0.1);
+}
+
+/* Performance optimizations */
+.map3-container * {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .map3-text-bubble {
+        padding: 24px 32px;
+        font-size: 1.4rem;
+        max-width: 90%;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .map3-container {
+        animation: none;
+    }
 }

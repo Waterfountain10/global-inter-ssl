@@ -1,4 +1,4 @@
-// src/Views/Map3.js - Updated for scroll-driven animations
+// src/Views/Map3.js
 import React, { useState, useEffect, useRef } from "react";
 import "./Map3.css";
 
@@ -30,25 +30,29 @@ export default function Map3({
 
   // Calculate dynamic values based on scroll progress
   const getOverlayOpacity = () => {
+    // Fade in overlay as user scrolls into section
     if (scrollProgress < 0.1) return 0;
     if (scrollProgress > 0.9) return 1;
-    return (scrollProgress - 0.1) / 0.8;
+    return (scrollProgress - 0.1) / 0.8; // Smooth fade from 10% to 90%
   };
 
   const getTextOpacity = () => {
+    // Text appears after overlay, disappears before section ends
     if (scrollProgress < 0.2) return 0;
     if (scrollProgress > 0.8) return Math.max(0, (1 - scrollProgress) / 0.2);
     return Math.min(1, (scrollProgress - 0.2) / 0.3);
   };
 
   const getTextTransform = () => {
-    const translateY = (scrollProgress - 0.5) * 20;
-    const scale = 0.95 + scrollProgress * 0.05;
+    // Subtle movement as user scrolls
+    const translateY = (scrollProgress - 0.5) * 20; // Move slightly based on progress
+    const scale = 0.95 + scrollProgress * 0.05; // Subtle scale effect
     return `translate(-50%, calc(-50% + ${translateY}px)) scale(${scale})`;
   };
 
   const getOverlayTransform = () => {
-    const scale = 1 + scrollProgress * 0.02;
+    // Parallax effect for overlay
+    const scale = 1 + scrollProgress * 0.02; // Very subtle zoom
     return `scale(${scale})`;
   };
 
@@ -57,27 +61,15 @@ export default function Map3({
       ref={containerRef}
       className={`map3-container scroll-driven${hasEntered ? " has-entered" : ""}${isActive ? " active" : ""}`}
       style={{
-        position: "relative",
-        width: "100%",
-        height: "100vh",
-        overflow: "hidden",
-        pointerEvents: "auto",
-        opacity: Math.max(0, Math.min(1, scrollProgress * 2)),
+        opacity: Math.max(0, Math.min(1, scrollProgress * 2)), // Overall container opacity
       }}
     >
-      {/* Map3 specific overlay */}
+      {/* Map3 specific overlay with scroll-driven opacity and transform */}
       <img
         className="map3-overlay scroll-responsive"
         src="/assets/images/map3_final.svg"
         alt="Map3 overlay"
         style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          zIndex: 2,
           opacity: getOverlayOpacity(),
           transform: getOverlayTransform(),
           transition: isActive
@@ -86,24 +78,10 @@ export default function Map3({
         }}
       />
 
-      {/* Text bubble */}
+      {/* Text bubble with scroll-driven animations */}
       <div
         className="map3-text-bubble scroll-responsive"
         style={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          background: "rgba(255, 255, 255, 0.35)",
-          backdropFilter: "blur(10px)",
-          padding: "36px 48px",
-          borderRadius: "40px",
-          boxShadow: "0 8px 25px rgba(0, 0, 0, 0.15)",
-          maxWidth: "700px",
-          textAlign: "center",
-          fontSize: "1.6rem",
-          fontWeight: "500",
-          color: "#333",
-          zIndex: 21,
           opacity: getTextOpacity(),
           transform: getTextTransform(),
           transition: isActive
@@ -112,15 +90,9 @@ export default function Map3({
         }}
       >
         <p>
-          To study the{" "}
-          <span style={{ color: "#FF395C", fontWeight: "bold" }}>
-            patterns of similarity
-          </span>{" "}
+          To study the <span className="highlight">patterns of similarity</span>{" "}
           between kitchens, living rooms, bedrooms, and bathrooms across{" "}
-          <span style={{ color: "#FF395C", fontWeight: "bold" }}>
-            80 global cities
-          </span>
-          .
+          <span className="highlight">80 global cities</span>.
         </p>
       </div>
     </div>

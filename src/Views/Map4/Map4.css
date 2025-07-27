@@ -1,78 +1,89 @@
 .map4-container {
-  position: fixed; /* Match previous maps' positioning for overlay */
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 16; /* Above world map (15), below Map3 (18) to prevent conflicts */
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    pointer-events: auto;
 }
 
-/* Map4 specific overlay - smooth fade-in transition */
+/* Scroll-driven container states */
+.map4-container.scroll-driven {
+    will-change: opacity;
+}
+
+.map4-container.active {
+    z-index: 25;
+}
+
+/* Map3 overlay - optimized for scroll performance */
 .map4-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  transition: opacity 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.3s !important;
-  z-index: 2; /* above world map background, below text */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 2;
+    will-change: opacity, transform;
+}
+
+/* Remove static animations in favor of scroll-driven ones */
+.map4-overlay.scroll-responsive {
+    animation: none;
+    transition: none; /* Remove all transitions for immediate response */
 }
 
 .map4-text-bubble {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(255,255,255,0.35);
-  padding: 36px 48px;
-  border-radius: 40px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-  max-width: 700px;
-  text-align: center;
-  font-size: 1.6rem;
-  font-weight: 500;
-  color: #333;
-  opacity: 0;
-  transition: opacity 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.5s !important;
-  z-index: 21; /* highest layer */
-}
-
-/* Visible state triggers fade-in of Map4 elements */
-.map4-container.visible .map4-overlay {
-  opacity: 1;
-}
-
-.map4-container.visible .map4-text-bubble {
-  opacity: 1;
-}
-
-/* Advancing state: text slides up and map4 overlay fades out */
-.map4-container.advancing .map4-text-bubble {
-  animation: slideUpAndExit 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards !important;
-}
-
-@keyframes slideUpAndExit {
-  0% {
+    position: absolute;
+    top: 50%;
+    left: 50%;
     transform: translate(-50%, -50%);
-    opacity: 1;
-  }
-  100% {
-    transform: translate(-50%, -300%);
-    opacity: 0;
-  }
+    background: rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 36px 48px;
+    border-radius: 40px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    max-width: 700px;
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: #333;
+    z-index: 21;
+    will-change: opacity, transform;
 }
 
-/* Map4 overlay fades out when advancing, persistent world map handled by HomePage */
-.map4-container.advancing .map4-overlay {
-  opacity: 0;
-  transition: opacity 2s ease-in-out !important;
+/* Remove static animations for scroll-responsive elements */
+.map4-text-bubble.scroll-responsive {
+    animation: none;
+    transition: none; /* Remove all transitions for immediate response */
 }
 
+/* Enhanced highlight for better readability */
 .highlight {
-  color: #FF395C;
-  font-weight: bold;
+    color: #ff395c;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(255, 57, 92, 0.1);
+}
+
+/* Performance optimizations */
+.map4-container * {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .map4-text-bubble {
+        padding: 24px 32px;
+        font-size: 1.4rem;
+        max-width: 90%;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .map4-container {
+        animation: none;
+    }
 }

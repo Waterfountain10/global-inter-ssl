@@ -164,8 +164,15 @@ export default function HomePage() {
         if (scrollY >= map1StartScroll && scrollY <= map1EndScroll) {
           map1Progress =
             (scrollY - map1StartScroll) / (map1EndScroll - map1StartScroll);
-        } else if (scrollY > map1EndScroll) {
+        } else if (scrollY > map1EndScroll && scrollY < map2StartScroll) {
           map1Progress = 1;
+        } else if (scrollY >= map2StartScroll) {
+          // Fade out Map1 when Map2 starts
+          const fadeOutProgress = Math.min(
+            1,
+            (scrollY - map2StartScroll) / (windowHeight * 0.5),
+          );
+          map1Progress = 1 - fadeOutProgress;
         }
 
         // Calculate Map2 progress
@@ -173,8 +180,15 @@ export default function HomePage() {
         if (scrollY >= map2StartScroll && scrollY <= map2EndScroll) {
           map2Progress =
             (scrollY - map2StartScroll) / (map2EndScroll - map2StartScroll);
-        } else if (scrollY > map2EndScroll) {
+        } else if (scrollY > map2EndScroll && scrollY < map3StartScroll) {
           map2Progress = 1;
+        } else if (scrollY >= map3StartScroll) {
+          // Fade out Map2 when Map3 starts
+          const fadeOutProgress = Math.min(
+            1,
+            (scrollY - map3StartScroll) / (windowHeight * 0.5),
+          );
+          map2Progress = 1 - fadeOutProgress;
         }
 
         // Calculate Map3 progress
@@ -182,8 +196,15 @@ export default function HomePage() {
         if (scrollY >= map3StartScroll && scrollY <= map3EndScroll) {
           map3Progress =
             (scrollY - map3StartScroll) / (map3EndScroll - map3StartScroll);
-        } else if (scrollY > map3EndScroll) {
+        } else if (scrollY > map3EndScroll && scrollY < map4StartScroll) {
           map3Progress = 1;
+        } else if (scrollY >= map4StartScroll) {
+          // Fade out Map3 when Map4 starts
+          const fadeOutProgress = Math.min(
+            1,
+            (scrollY - map4StartScroll) / (windowHeight * 0.5),
+          );
+          map3Progress = 1 - fadeOutProgress;
         }
 
         // Calculate Map4 progress
@@ -191,8 +212,15 @@ export default function HomePage() {
         if (scrollY >= map4StartScroll && scrollY <= map4EndScroll) {
           map4Progress =
             (scrollY - map4StartScroll) / (map4EndScroll - map4StartScroll);
-        } else if (scrollY > map4EndScroll) {
+        } else if (scrollY > map4EndScroll && scrollY < map5StartScroll) {
           map4Progress = 1;
+        } else if (scrollY >= map5StartScroll) {
+          // Fade out Map4 when Map5 starts
+          const fadeOutProgress = Math.min(
+            1,
+            (scrollY - map5StartScroll) / (windowHeight * 0.5),
+          );
+          map4Progress = 1 - fadeOutProgress;
         }
 
         // Calculate Map5 progress
@@ -200,8 +228,15 @@ export default function HomePage() {
         if (scrollY >= map5StartScroll && scrollY <= map5EndScroll) {
           map5Progress =
             (scrollY - map5StartScroll) / (map5EndScroll - map5StartScroll);
-        } else if (scrollY > map5EndScroll) {
+        } else if (scrollY > map5EndScroll && scrollY < map6StartScroll) {
           map5Progress = 1;
+        } else if (scrollY >= map6StartScroll) {
+          // Fade out Map5 when Map6 starts
+          const fadeOutProgress = Math.min(
+            1,
+            (scrollY - map6StartScroll) / (windowHeight * 0.5),
+          );
+          map5Progress = 1 - fadeOutProgress;
         }
 
         // Calculate Map6 progress
