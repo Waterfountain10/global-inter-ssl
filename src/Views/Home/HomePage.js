@@ -5,6 +5,10 @@ import TopFold from "../TopFold/TopFold";
 import ResearchQuestion from "../ResearchQuestion/ResearchQuestion";
 import Map1 from "../Map1/Map1";
 import Map2 from "../Map2/Map2";
+import Map3 from "../Map3/Map3";
+import Map4 from "../Map4/Map4";
+import Map5 from "../Map5/Map5";
+import Map6 from "../Map6/Map6";
 
 export default function HomePage() {
   const [scrollMode, setScrollMode] = useState("LOCKED"); // LOCKED, UNLOCKED
@@ -13,6 +17,10 @@ export default function HomePage() {
   const [mapProgress, setMapProgress] = useState({
     map1: 0,
     map2: 0,
+    map3: 0,
+    map4: 0,
+    map5: 0,
+    map6: 0,
   });
 
   // Initialize with complete scroll lock
@@ -135,6 +143,22 @@ export default function HomePage() {
         const map2StartScroll = windowHeight * 5;
         const map2EndScroll = windowHeight * 7;
 
+        // Map3 starts after Map2
+        const map3StartScroll = windowHeight * 7;
+        const map3EndScroll = windowHeight * 9;
+
+        // Map4 starts after Map3
+        const map4StartScroll = windowHeight * 9;
+        const map4EndScroll = windowHeight * 11;
+
+        // Map5 starts after Map4
+        const map5StartScroll = windowHeight * 11;
+        const map5EndScroll = windowHeight * 13;
+
+        // Map6 starts after Map5
+        const map6StartScroll = windowHeight * 13;
+        const map6EndScroll = windowHeight * 15;
+
         // Calculate Map1 progress
         let map1Progress = 0;
         if (scrollY >= map1StartScroll && scrollY <= map1EndScroll) {
@@ -153,9 +177,49 @@ export default function HomePage() {
           map2Progress = 1;
         }
 
+        // Calculate Map3 progress
+        let map3Progress = 0;
+        if (scrollY >= map3StartScroll && scrollY <= map3EndScroll) {
+          map3Progress =
+            (scrollY - map3StartScroll) / (map3EndScroll - map3StartScroll);
+        } else if (scrollY > map3EndScroll) {
+          map3Progress = 1;
+        }
+
+        // Calculate Map4 progress
+        let map4Progress = 0;
+        if (scrollY >= map4StartScroll && scrollY <= map4EndScroll) {
+          map4Progress =
+            (scrollY - map4StartScroll) / (map4EndScroll - map4StartScroll);
+        } else if (scrollY > map4EndScroll) {
+          map4Progress = 1;
+        }
+
+        // Calculate Map5 progress
+        let map5Progress = 0;
+        if (scrollY >= map5StartScroll && scrollY <= map5EndScroll) {
+          map5Progress =
+            (scrollY - map5StartScroll) / (map5EndScroll - map5StartScroll);
+        } else if (scrollY > map5EndScroll) {
+          map5Progress = 1;
+        }
+
+        // Calculate Map6 progress
+        let map6Progress = 0;
+        if (scrollY >= map6StartScroll && scrollY <= map6EndScroll) {
+          map6Progress =
+            (scrollY - map6StartScroll) / (map6EndScroll - map6StartScroll);
+        } else if (scrollY > map6EndScroll) {
+          map6Progress = 1;
+        }
+
         setMapProgress({
           map1: Math.max(0, Math.min(1, map1Progress)),
           map2: Math.max(0, Math.min(1, map2Progress)),
+          map3: Math.max(0, Math.min(1, map3Progress)),
+          map4: Math.max(0, Math.min(1, map4Progress)),
+          map5: Math.max(0, Math.min(1, map5Progress)),
+          map6: Math.max(0, Math.min(1, map6Progress)),
         });
       }
     };
@@ -186,6 +250,10 @@ export default function HomePage() {
         <div>Scroll Y: {Math.round(scrollY)}px</div>
         <div>Map1 Progress: {Math.round(mapProgress.map1 * 100)}%</div>
         <div>Map2 Progress: {Math.round(mapProgress.map2 * 100)}%</div>
+        <div>Map3 Progress: {Math.round(mapProgress.map3 * 100)}%</div>
+        <div>Map4 Progress: {Math.round(mapProgress.map4 * 100)}%</div>
+        <div>Map5 Progress: {Math.round(mapProgress.map5 * 100)}%</div>
+        <div>Map6 Progress: {Math.round(mapProgress.map6 * 100)}%</div>
         <button
           onClick={handleTopFoldScroll}
           style={{
@@ -207,7 +275,9 @@ export default function HomePage() {
       <div
         style={{
           height:
-            scrollMode === "UNLOCKED" ? `${window.innerHeight * 8}px` : "100vh", // Increased for more scroll space
+            scrollMode === "UNLOCKED"
+              ? `${window.innerHeight * 16}px`
+              : "100vh", // Increased for all 6 maps + extra space
           position: "relative",
           background: "#EEEEEE",
         }}
@@ -305,6 +375,86 @@ export default function HomePage() {
                 />
               </div>
             )}
+
+            {/* Map3 Component */}
+            {mapProgress.map3 > 0 && (
+              <div
+                style={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100vh",
+                  zIndex: 30,
+                  pointerEvents: "none",
+                }}
+              >
+                <Map3
+                  scrollProgress={mapProgress.map3}
+                  isActive={mapProgress.map3 > 0.1}
+                />
+              </div>
+            )}
+
+            {/* Map4 Component */}
+            {mapProgress.map4 > 0 && (
+              <div
+                style={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100vh",
+                  zIndex: 35,
+                  pointerEvents: "none",
+                }}
+              >
+                <Map4
+                  scrollProgress={mapProgress.map4}
+                  isActive={mapProgress.map4 > 0.1}
+                />
+              </div>
+            )}
+
+            {/* Map5 Component */}
+            {mapProgress.map5 > 0 && (
+              <div
+                style={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100vh",
+                  zIndex: 40,
+                  pointerEvents: "none",
+                }}
+              >
+                <Map5
+                  scrollProgress={mapProgress.map5}
+                  isActive={mapProgress.map5 > 0.1}
+                />
+              </div>
+            )}
+
+            {/* Map6 Component */}
+            {mapProgress.map6 > 0 && (
+              <div
+                style={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100vh",
+                  zIndex: 45,
+                  pointerEvents: "none",
+                }}
+              >
+                <Map6
+                  scrollProgress={mapProgress.map6}
+                  isActive={mapProgress.map6 > 0.1}
+                />
+              </div>
+            )}
           </>
         )}
 
@@ -313,7 +463,7 @@ export default function HomePage() {
           <div
             style={{
               position: "absolute",
-              top: `${window.innerHeight * 7}px`,
+              top: `${window.innerHeight * 15}px`,
               width: "100%",
               height: "100vh",
               background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
