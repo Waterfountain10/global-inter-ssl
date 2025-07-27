@@ -159,11 +159,11 @@ export default function HomePage() {
 
         // Map6 starts after Map5
         const map6StartScroll = windowHeight * 13;
-        const map6EndScroll = windowHeight * 15;
+        const map6EndScroll = windowHeight * 14.5; // Shortened Map6 range
 
-        // Credits starts after Map6
-        const creditsStartScroll = windowHeight * 15;
-        const creditsEndScroll = windowHeight * 17;
+        // Credits starts earlier, overlapping with end of Map6
+        const creditsStartScroll = windowHeight * 14;
+        const creditsEndScroll = windowHeight * 16;
 
         // Calculate Map1 progress
         let map1Progress = 0;
@@ -250,8 +250,15 @@ export default function HomePage() {
         if (scrollY >= map6StartScroll && scrollY <= map6EndScroll) {
           map6Progress =
             (scrollY - map6StartScroll) / (map6EndScroll - map6StartScroll);
-        } else if (scrollY > map6EndScroll) {
+        } else if (scrollY > map6EndScroll && scrollY < creditsStartScroll) {
           map6Progress = 1;
+        } else if (scrollY >= creditsStartScroll) {
+          // Fade out Map6 when Credits starts
+          const fadeOutProgress = Math.min(
+            1,
+            (scrollY - creditsStartScroll) / (windowHeight * 0.5),
+          );
+          map6Progress = 1 - fadeOutProgress;
         }
 
         // Calculate Credits progress
@@ -260,8 +267,15 @@ export default function HomePage() {
           creditsProgress =
             (scrollY - creditsStartScroll) /
             (creditsEndScroll - creditsStartScroll);
+          console.log("🎬 Credits calculation:", {
+            scrollY,
+            creditsStartScroll,
+            creditsEndScroll,
+            creditsProgress,
+          });
         } else if (scrollY > creditsEndScroll) {
           creditsProgress = 1;
+          console.log("🎬 Credits at 100%");
         }
 
         setMapProgress({
@@ -307,6 +321,9 @@ export default function HomePage() {
         <div>Map5 Progress: {Math.round(mapProgress.map5 * 100)}%</div>
         <div>Map6 Progress: {Math.round(mapProgress.map6 * 100)}%</div>
         <div>Credits Progress: {Math.round(mapProgress.credits * 100)}%</div>
+        <div>Window Height: {window.innerHeight}px</div>
+        <div>Credits Start: {window.innerHeight * 14}px</div>
+        <div>Credits End: {window.innerHeight * 16}px</div>
         <button
           onClick={handleTopFoldScroll}
           style={{
@@ -508,7 +525,6 @@ export default function HomePage() {
                 />
               </div>
             )}
-
             {/* Credits Component */}
             {mapProgress.credits > 0 && (
               <div
@@ -519,7 +535,7 @@ export default function HomePage() {
                   width: "100%",
                   height: "100vh",
                   zIndex: 50,
-                  pointerEvents: "auto", // Allow interaction with credits
+                  pointerEvents: "auto", // Always allow interaction across full screen
                 }}
               >
                 <Credits
@@ -530,14 +546,15 @@ export default function HomePage() {
             )}
           </>
         )}
+
         {/* Additional scroll space for credits */}
         {scrollMode === "UNLOCKED" && currentPhase === "MAPS" && (
           <div
             style={{
               position: "absolute",
-              top: `${window.innerHeight * 17}px`,
+              top: `${window.innerHeight * 18}px`,
               width: "100%",
-              height: "100vh",
+              height: `${window.innerHeight * 2}px`, // Extra 2vh of scroll space
               background: "#EEEEEE",
               zIndex: 5,
             }}
