@@ -113,7 +113,7 @@ const TopFold = ({ onScrollTrigger }) => {
         preload="auto"
       >
         <source
-          src="assets/videos/globalinterior_video2.mp4"
+          src="assets/videos/globalinteriors_video.mov"
           type="video/mp4"
         />
       </video>
@@ -121,12 +121,12 @@ const TopFold = ({ onScrollTrigger }) => {
       {/* Corner logos */}
       <img
         className="scl-logo"
-        src="public/assets/images/scl_logo_white.png"
+        src="assets/images/scl_logo_white.png"
         alt="Senseable City Lab"
       />
       <img
         className="mit-logo"
-        src="public/assets/images/mit_logo_white.png"
+        src="assets/images/mit_logo_white.png"
         alt="MIT"
       />
 

@@ -309,49 +309,6 @@ export default function HomePage() {
 
   return (
     <div className="globalinteriors-homepage">
-      {/* Debug Panel */}
-      <div
-        style={{
-          position: "fixed",
-          top: "10px",
-          left: "10px",
-          background: "rgba(0,0,0,0.9)",
-          color: "white",
-          padding: "15px",
-          borderRadius: "8px",
-          fontSize: "12px",
-          zIndex: 10001,
-          fontFamily: "monospace",
-        }}
-      >
-        <div>Scroll Mode: {scrollMode}</div>
-        <div>Phase: {currentPhase}</div>
-        <div>Transitioning: {isTransitioning ? "YES" : "NO"}</div>
-        <div>Scroll Y: {Math.round(scrollY)}px</div>
-        <div>Map1 Progress: {Math.round(mapProgress.map1 * 100)}%</div>
-        <div>Map2 Progress: {Math.round(mapProgress.map2 * 100)}%</div>
-        <div>Map3 Progress: {Math.round(mapProgress.map3 * 100)}%</div>
-        <div>Map4 Progress: {Math.round(mapProgress.map4 * 100)}%</div>
-        <div>Map5 Progress: {Math.round(mapProgress.map5 * 100)}%</div>
-        <div>Map6 Progress: {Math.round(mapProgress.map6 * 100)}%</div>
-        <div>Credits Progress: {Math.round(mapProgress.credits * 100)}%</div>
-        <button
-          onClick={handleTopFoldScroll}
-          style={{
-            marginTop: "10px",
-            padding: "8px 16px",
-            background: "#FF395C",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer",
-            fontSize: "10px",
-          }}
-        >
-          MANUAL TRIGGER
-        </button>
-      </div>
-
       {/* Set document height for scrolling when unlocked */}
       <div
         style={{

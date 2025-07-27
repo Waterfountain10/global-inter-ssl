@@ -121,33 +121,71 @@ export default function ResearchQuestion() {
     }
   };
 
-  // Enhanced search bar positioning with slow fade-in animation
+  // Clean, responsive search bar with proper centering
   const getSearchBarStyle = () => {
+    const currentText = getTypedText();
+
+    // Calculate dynamic width based on text length and screen size
+    const getResponsiveWidth = () => {
+      // Base character width estimation
+      const fontSize =
+        window.innerWidth <= 480
+          ? 14.4
+          : window.innerWidth <= 768
+            ? 17.6
+            : 22.4; // Convert rem to px
+      const charWidth = fontSize * 0.55; // Approximate character width
+
+      // Calculate text width
+      const textWidthPx = currentText.length * charWidth;
+
+      // Button and spacing
+      const buttonWidth = window.innerWidth <= 768 ? 40 : 50;
+      const horizontalPadding = window.innerWidth <= 768 ? 32 : 48;
+      const spacing = 20;
+
+      // Minimum widths
+      const minWidth =
+        window.innerWidth <= 480 ? 320 : window.innerWidth <= 768 ? 400 : 480;
+      const maxWidth = Math.min(window.innerWidth * 0.9, 800);
+
+      // Calculate total needed width
+      const neededWidth =
+        textWidthPx + buttonWidth + horizontalPadding + spacing;
+
+      return Math.max(minWidth, Math.min(maxWidth, neededWidth));
+    };
+
     const baseStyle = {
       position: "fixed",
       background: "#ffffff",
       backdropFilter: "blur(10px)",
-      width: window.innerWidth <= 768 ? "90%" : "80%",
-      maxWidth: window.innerWidth <= 768 ? "none" : "1050px",
-      padding: window.innerWidth <= 768 ? "6px" : "8px",
+      WebkitBackdropFilter: "blur(10px)",
+      width: `${getResponsiveWidth()}px`,
+      padding: window.innerWidth <= 768 ? "12px 16px" : "16px 24px",
       borderRadius: window.innerWidth <= 768 ? "50px" : "60px",
       boxShadow:
         "0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)",
       display: "flex",
       alignItems: "center",
+      justifyContent: "space-between",
       left: "50%",
       zIndex: 10000,
-      transition: "all 1.0s cubic-bezier(0.25, 0.46, 0.45, 0.94)", // Smoother, longer transition
-      // Slow fade-in animation when first appearing
-      animation: showSearchBar ? "slowFadeIn 2s ease-out forwards" : "none",
+      transition: "all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+      opacity: 0, // Start invisible
+      transform: "translateX(-50%)", // Default centering
     };
 
+    // Position and visibility based on state
     if (searchBarState === "center") {
       return {
         ...baseStyle,
         top: "50%",
         transform: "translate(-50%, -50%)",
         opacity: showSearchBar ? 1 : 0,
+        animation: showSearchBar
+          ? "slowFadeInCentered 2s ease-out forwards"
+          : "none",
       };
     } else if (searchBarState === "pinned") {
       return {
@@ -155,7 +193,7 @@ export default function ResearchQuestion() {
         top: window.innerWidth <= 768 ? "60px" : "80px",
         transform: "translateX(-50%)",
         opacity: 1,
-        animation: "none", // Remove initial fade animation when pinned
+        animation: "none",
       };
     } else if (searchBarState === "floating") {
       const scrollY = window.pageYOffset;
@@ -163,10 +201,9 @@ export default function ResearchQuestion() {
       const floatStartScroll = windowHeight * 2.8;
       const floatProgress = Math.min(
         1,
-        Math.max(0, (scrollY - floatStartScroll) / (windowHeight * 0.8)), // Slower float transition
+        Math.max(0, (scrollY - floatStartScroll) / (windowHeight * 0.8)),
       );
 
-      // Use easing for smoother float animation
       const easedFloatProgress = Math.pow(floatProgress, 0.6);
 
       return {
@@ -174,8 +211,7 @@ export default function ResearchQuestion() {
         top: window.innerWidth <= 768 ? "60px" : "80px",
         transform: `translateX(-50%) translateY(${-easedFloatProgress * 200}px)`,
         opacity: Math.max(0.2, 1 - easedFloatProgress * 0.8),
-        transition: "all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-        animation: "none", // Remove initial fade animation when floating
+        animation: "none",
       };
     }
 
@@ -184,7 +220,7 @@ export default function ResearchQuestion() {
 
   return (
     <>
-      {/* Main container with enhanced smooth transitions */}
+      {/* Main container */}
       <div
         ref={containerRef}
         className="research-question"
@@ -198,13 +234,13 @@ export default function ResearchQuestion() {
           background: "#EEEEEE",
           zIndex: containerMode === "fixed" ? 80 : 20,
           opacity: isVisible ? 1 : 0,
-          transition: "opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)", // Smoother fade
+          transition: "opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
           overflow: containerMode === "fixed" ? "hidden" : "visible",
         }}
       >
-        {/* Enhanced scroll instruction with slow fade-in */}
+        {/* Scroll instruction */}
         {showSearchBar &&
-          scrollProgress < 0.02 && // Show earlier for smoother UX
+          scrollProgress < 0.02 &&
           searchBarState === "center" &&
           containerMode === "fixed" && (
             <div
@@ -220,15 +256,10 @@ export default function ResearchQuestion() {
                 opacity: 0,
                 padding: "0 20px",
                 maxWidth: "90%",
-                animation: "slowFadeIn 2s ease-out forwards", // Slow fade-in animation
+                animation: "slowFadeIn 2s ease-out forwards",
               }}
             >
-              <div
-                style={{
-                  marginBottom: "10px",
-                  lineHeight: 1.4,
-                }}
-              >
+              <div style={{ marginBottom: "10px", lineHeight: 1.4 }}>
                 {window.innerWidth <= 768
                   ? "Scroll to reveal the question"
                   : "Scroll down to reveal the research question"}
@@ -237,7 +268,7 @@ export default function ResearchQuestion() {
                 style={{
                   fontSize: window.innerWidth <= 768 ? "1.5rem" : "1.8rem",
                   color: "#FF395C",
-                  animation: "bounce 2s infinite 2s", // Start bouncing after fade-in completes
+                  animation: "bounce 2s infinite 2s",
                 }}
               >
                 ↓
@@ -245,7 +276,7 @@ export default function ResearchQuestion() {
             </div>
           )}
 
-        {/* Enhanced continue instruction with slow fade-in */}
+        {/* Continue instruction */}
         {showSearchBar &&
           isComplete &&
           searchBarState === "pinned" &&
@@ -263,15 +294,10 @@ export default function ResearchQuestion() {
                 opacity: 0,
                 padding: "0 20px",
                 maxWidth: "90%",
-                animation: "slowFadeIn 1.5s ease-out forwards", // Slightly faster since it appears later
+                animation: "slowFadeIn 1.5s ease-out forwards",
               }}
             >
-              <div
-                style={{
-                  marginBottom: "10px",
-                  lineHeight: 1.4,
-                }}
-              >
+              <div style={{ marginBottom: "10px", lineHeight: 1.4 }}>
                 {window.innerWidth <= 768
                   ? "Continue scrolling to explore"
                   : "Continue scrolling or click the button to explore the maps"}
@@ -280,7 +306,7 @@ export default function ResearchQuestion() {
                 style={{
                   fontSize: window.innerWidth <= 768 ? "1.5rem" : "1.8rem",
                   color: "#FF395C",
-                  animation: "bounce 2s infinite 1.5s", // Start bouncing after fade-in
+                  animation: "bounce 2s infinite 1.5s",
                 }}
               >
                 ↓
@@ -289,61 +315,58 @@ export default function ResearchQuestion() {
           )}
       </div>
 
-      {/* Enhanced search bar with smoother typing animation */}
+      {/* Clean, centered search bar */}
       {showSearchBar && (
         <div style={getSearchBarStyle()}>
           <span
             style={{
               color: "#393939",
               fontSize:
-                window.innerWidth <= 768
-                  ? "1.1rem"
-                  : window.innerWidth <= 480
-                    ? "1rem"
-                    : "1.5rem",
+                window.innerWidth <= 480
+                  ? "0.9rem"
+                  : window.innerWidth <= 768
+                    ? "1.1rem"
+                    : "1.4rem",
               fontWeight: 900,
-              marginLeft: window.innerWidth <= 768 ? "20px" : "45px",
-              letterSpacing: window.innerWidth <= 768 ? "-0.5px" : "-1px",
+              letterSpacing: window.innerWidth <= 768 ? "-0.3px" : "-0.8px",
               whiteSpace: "nowrap",
-              overflow: "hidden",
-              minHeight: window.innerWidth <= 768 ? "1.4rem" : "1.8rem",
               flex: 1,
-              paddingRight: "10px",
-              transition: "all 0.3s ease", // Smooth text transitions
+              textAlign: "left",
+              transition: "all 0.3s ease",
+              overflow: "visible",
+              display: "flex",
+              alignItems: "center",
             }}
           >
             {getTypedText()}
-            {scrollProgress > 0 &&
-              scrollProgress < 0.98 && ( // Show cursor until nearly complete
-                <span
-                  style={{
-                    animation: "blink 1s step-end infinite",
-                    marginLeft: "4px",
-                    opacity: scrollProgress > 0.02 ? 1 : 0, // Fade in cursor
-                    transition: "opacity 0.3s ease",
-                  }}
-                >
-                  |
-                </span>
-              )}
+            {scrollProgress > 0 && scrollProgress < 0.98 && (
+              <span
+                style={{
+                  animation: "blink 1s step-end infinite",
+                  marginLeft: "4px",
+                  opacity: scrollProgress > 0.02 ? 1 : 0,
+                  transition: "opacity 0.3s ease",
+                }}
+              >
+                |
+              </span>
+            )}
           </span>
 
-          {/* Enhanced button with smoother state transitions */}
           <div
             onClick={handleButtonClick}
             style={{
-              marginLeft: "auto",
-              width: window.innerWidth <= 768 ? "50px" : "70px",
-              height: window.innerWidth <= 768 ? "50px" : "70px",
+              width: window.innerWidth <= 768 ? "40px" : "50px",
+              height: window.innerWidth <= 768 ? "40px" : "50px",
               borderRadius: "50%",
-              background: scrollProgress > 0.9 ? "#FF395C" : "#cccccc", // More responsive threshold
+              background: scrollProgress > 0.9 ? "#FF395C" : "#cccccc",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               color: "white",
-              fontSize: window.innerWidth <= 768 ? "18px" : "24px",
+              fontSize: window.innerWidth <= 768 ? "14px" : "18px",
               fontWeight: "bold",
-              transition: "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)", // Smoother button transition
+              transition: "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
               cursor: isComplete ? "pointer" : "default",
               transform: isComplete ? "scale(1.05)" : "scale(1)",
               flexShrink: 0,
@@ -351,7 +374,7 @@ export default function ResearchQuestion() {
               boxShadow: isComplete
                 ? "0 4px 12px rgba(255, 57, 92, 0.3)"
                 : "none",
-              opacity: scrollProgress > 0.1 ? 1 : 0.7, // Fade in with progress
+              opacity: scrollProgress > 0.1 ? 1 : 0.7,
             }}
           >
             →
@@ -359,37 +382,6 @@ export default function ResearchQuestion() {
         </div>
       )}
 
-      {/* Enhanced debug info */}
-      <div
-        style={{
-          position: "fixed",
-          top: "10px",
-          right: "10px",
-          background: "rgba(0,0,0,0.8)",
-          color: "white",
-          padding: "12px",
-          borderRadius: "8px",
-          fontSize: "11px",
-          zIndex: 10002,
-          fontFamily: "monospace",
-          transition: "opacity 0.3s ease",
-          opacity: 0.8,
-        }}
-      >
-        <div>Visible: {isVisible ? "YES" : "NO"}</div>
-        <div>Show Bar: {showSearchBar ? "YES" : "NO"}</div>
-        <div>Search State: {searchBarState}</div>
-        <div>Container Mode: {containerMode}</div>
-        <div>Scroll Progress: {Math.round(scrollProgress * 100)}%</div>
-        <div>Complete: {isComplete ? "YES" : "NO"}</div>
-        <div>Scroll Y: {Math.round(window.pageYOffset)}px</div>
-        <div>
-          Chars: {getTypedText().length}/{fullText.length}
-        </div>
-        <div>Smooth Easing: ON</div>
-      </div>
-
-      {/* Enhanced CSS for slow fade-in animations */}
       <style>{`
         @keyframes slowFadeIn {
           0% {
@@ -419,21 +411,14 @@ export default function ResearchQuestion() {
           }
         }
 
-        /* Enhanced smooth scrolling */
         html {
           scroll-behavior: smooth;
-        }
-
-        /* Optimize transitions for 60fps */
-        * {
-          will-change: auto;
         }
 
         .research-question {
           will-change: opacity, transform;
         }
 
-        /* Reduce motion for accessibility */
         @media (prefers-reduced-motion: reduce) {
           * {
             animation-duration: 0.01ms !important;
