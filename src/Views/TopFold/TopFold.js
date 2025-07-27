@@ -90,19 +90,19 @@ const TopFold = ({ onScrollTrigger }) => {
         preload="auto"
       >
         <source
-          src="/assets/videos/globalinterior_video2.mp4"
+          src="assets/videos/globalinterior_video2.mp4"
           type="video/mp4"
         />
       </video>
 
       <img
         className="scl-logo"
-        src="/assets/images/scl_logo_white.png"
+        src="assets/images/scl_logo_white.png"
         alt="Senseable City Lab"
       />
       <img
         className="mit-logo"
-        src="/assets/images/mit_logo_white.png"
+        src="assets/images/mit_logo_white.png"
         alt="MIT"
       />
 
@@ -118,7 +118,7 @@ const TopFold = ({ onScrollTrigger }) => {
         <div className="scroll-text">Scroll to explore</div>
         <img
           className="scroll-icon"
-          src="/assets/images/red_arrow.svg"
+          src="assets/images/red_arrow.svg"
           alt="Scroll Down"
         />
       </div>

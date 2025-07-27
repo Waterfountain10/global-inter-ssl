@@ -61,24 +61,17 @@ export default function HomePage() {
     setScrollMode("UNLOCKED");
     setCurrentPhase("RESEARCH");
 
-    // Trigger research question
-    setTimeout(() => {
-      sessionStorage.setItem("phaseTransition", "true");
-      console.log("✅ Research phase transition triggered");
-    }, 100);
+    // Trigger research question immediately (no delay)
+    sessionStorage.setItem("phaseTransition", "true");
+    console.log("✅ Research phase transition triggered");
 
-    setTimeout(() => {
-      sessionStorage.setItem("startTyping", "true");
-      console.log("✅ Research typing triggered");
-    }, 800);
-
-    // Smooth scroll to next section
+    // Small scroll to get user started
     setTimeout(() => {
       window.scrollTo({
-        top: window.innerHeight * 0.5,
+        top: window.innerHeight * 0.1,
         behavior: "smooth",
       });
-      console.log("✅ Smooth scroll initiated");
+      console.log("✅ Initial scroll initiated");
     }, 200);
   }, []);
 
@@ -156,7 +149,7 @@ export default function HomePage() {
       <div
         style={{
           height:
-            scrollMode === "UNLOCKED" ? `${window.innerHeight * 5}px` : "100vh",
+            scrollMode === "UNLOCKED" ? `${window.innerHeight * 3}px` : "100vh", // Increased height for typing space
           position: "relative",
           background: "#EEEEEE",
         }}
@@ -175,8 +168,8 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Research Question Section - only show during research phase */}
-        {currentPhase === "RESEARCH" && (
+        {/* Research Question Section - always mounted after research phase starts */}
+        {(currentPhase === "RESEARCH" || currentPhase === "MAPS") && (
           <div
             style={{
               position: "fixed",
@@ -184,7 +177,7 @@ export default function HomePage() {
               left: 0,
               width: "100%",
               height: "100vh",
-              zIndex: 90,
+              zIndex: currentPhase === "RESEARCH" ? 90 : 30,
               background: "#EEEEEE",
             }}
           >
@@ -192,24 +185,9 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Maps Section - show world map and scroll-responsive content */}
+        {/* Maps Section - additional content over ResearchQuestion */}
         {currentPhase === "MAPS" && (
           <>
-            {/* Keep ResearchQuestion visible but lower z-index for search bar */}
-            <div
-              style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100vh",
-                zIndex: 30,
-                background: "#EEEEEE",
-              }}
-            >
-              <ResearchQuestion />
-            </div>
-
             {/* World Map Background */}
             <div
               style={{
