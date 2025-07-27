@@ -1,8 +1,8 @@
-// src/Views/Map6.js - Updated for scroll-driven animations
+// src/Views/Map5.js - Updated for scroll-driven animations
 import React, { useState, useEffect, useRef } from "react";
 import "./Map6.css";
 
-export default function Map6({
+export default function Map5({
   scrollProgress = 0,
   isActive = false,
   onMount,
@@ -24,7 +24,7 @@ export default function Map6({
   useEffect(() => {
     if (isActive && !hasEntered) {
       setHasEntered(true);
-      console.log("📍 Map6 entered for first time");
+      console.log("📍 Map5 entered for first time");
     }
   }, [isActive, hasEntered]);
 
@@ -65,7 +65,7 @@ export default function Map6({
         opacity: Math.max(0, Math.min(1, scrollProgress * 2)),
       }}
     >
-      {/* Map6 specific overlay */}
+      {/* Map5 specific overlay */}
       <img
         className="map6-overlay scroll-responsive"
         src="/assets/images/map6_final.svg"
@@ -112,10 +112,11 @@ export default function Map6({
         }}
       >
         <p>
-          Our findings show that despite global pressures and trends towards
-          cultural homogenization,{" "}
+          Revealing that certain{" "}
+          <span style={{ color: "#FF395C", fontWeight: "bold" }}>objects</span>{" "}
+          — either through their presence or unique appearance — serve as{" "}
           <span style={{ color: "#FF395C", fontWeight: "bold" }}>
-            local cultural identities nevertheless remain
+            markers of visual identity
           </span>
           .
         </p>

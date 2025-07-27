@@ -9,6 +9,7 @@ import Map3 from "../Map3/Map3";
 import Map4 from "../Map4/Map4";
 import Map5 from "../Map5/Map5";
 import Map6 from "../Map6/Map6";
+import Credits from "../Credits/Credits";
 
 export default function HomePage() {
   const [scrollMode, setScrollMode] = useState("LOCKED"); // LOCKED, UNLOCKED
@@ -21,6 +22,7 @@ export default function HomePage() {
     map4: 0,
     map5: 0,
     map6: 0,
+    credits: 0,
   });
 
   // Initialize with complete scroll lock
@@ -159,6 +161,10 @@ export default function HomePage() {
         const map6StartScroll = windowHeight * 13;
         const map6EndScroll = windowHeight * 15;
 
+        // Credits starts after Map6
+        const creditsStartScroll = windowHeight * 15;
+        const creditsEndScroll = windowHeight * 17;
+
         // Calculate Map1 progress
         let map1Progress = 0;
         if (scrollY >= map1StartScroll && scrollY <= map1EndScroll) {
@@ -248,6 +254,16 @@ export default function HomePage() {
           map6Progress = 1;
         }
 
+        // Calculate Credits progress
+        let creditsProgress = 0;
+        if (scrollY >= creditsStartScroll && scrollY <= creditsEndScroll) {
+          creditsProgress =
+            (scrollY - creditsStartScroll) /
+            (creditsEndScroll - creditsStartScroll);
+        } else if (scrollY > creditsEndScroll) {
+          creditsProgress = 1;
+        }
+
         setMapProgress({
           map1: Math.max(0, Math.min(1, map1Progress)),
           map2: Math.max(0, Math.min(1, map2Progress)),
@@ -255,6 +271,7 @@ export default function HomePage() {
           map4: Math.max(0, Math.min(1, map4Progress)),
           map5: Math.max(0, Math.min(1, map5Progress)),
           map6: Math.max(0, Math.min(1, map6Progress)),
+          credits: Math.max(0, Math.min(1, creditsProgress)),
         });
       }
     };
@@ -289,6 +306,7 @@ export default function HomePage() {
         <div>Map4 Progress: {Math.round(mapProgress.map4 * 100)}%</div>
         <div>Map5 Progress: {Math.round(mapProgress.map5 * 100)}%</div>
         <div>Map6 Progress: {Math.round(mapProgress.map6 * 100)}%</div>
+        <div>Credits Progress: {Math.round(mapProgress.credits * 100)}%</div>
         <button
           onClick={handleTopFoldScroll}
           style={{
@@ -490,28 +508,40 @@ export default function HomePage() {
                 />
               </div>
             )}
+
+            {/* Credits Component */}
+            {mapProgress.credits > 0 && (
+              <div
+                style={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100vh",
+                  zIndex: 50,
+                  pointerEvents: "auto", // Allow interaction with credits
+                }}
+              >
+                <Credits
+                  scrollProgress={mapProgress.credits}
+                  isActive={mapProgress.credits > 0.1}
+                />
+              </div>
+            )}
           </>
         )}
-
-        {/* Additional placeholder content for extended scrolling */}
+        {/* Additional scroll space for credits */}
         {scrollMode === "UNLOCKED" && currentPhase === "MAPS" && (
           <div
             style={{
               position: "absolute",
-              top: `${window.innerHeight * 15}px`,
+              top: `${window.innerHeight * 17}px`,
               width: "100%",
               height: "100vh",
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "white",
-              fontSize: "2rem",
-              zIndex: 10,
+              background: "#EEEEEE",
+              zIndex: 5,
             }}
-          >
-            CREDITS SECTION PLACEHOLDER
-          </div>
+          />
         )}
       </div>
     </div>
