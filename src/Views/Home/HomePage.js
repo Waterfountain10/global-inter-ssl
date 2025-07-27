@@ -1,4 +1,4 @@
-// src/Views/HomePage.js - Updated Credits calculation
+// src/Views/HomePage.js - Simplified smooth transition
 import React, { useState, useEffect, useCallback } from "react";
 import "./HomePage.css";
 import TopFold from "../TopFold/TopFold";
@@ -15,6 +15,7 @@ export default function HomePage() {
   const [scrollMode, setScrollMode] = useState("LOCKED"); // LOCKED, UNLOCKED
   const [currentPhase, setCurrentPhase] = useState("TOPFOLD"); // TOPFOLD, RESEARCH, MAPS
   const [scrollY, setScrollY] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false); // For smooth transition
   const [mapProgress, setMapProgress] = useState({
     map1: 0,
     map2: 0,
@@ -58,37 +59,49 @@ export default function HomePage() {
     };
   }, []);
 
-  // Handle TopFold scroll trigger
+  // Handle TopFold scroll trigger - smooth transition
   const handleTopFoldScroll = useCallback(() => {
-    console.log("🚀 HomePage: TopFold scroll triggered!");
+    console.log(
+      "🚀 HomePage: TopFold scroll triggered - starting smooth transition!",
+    );
 
-    // Remove all scroll locks
-    document.documentElement.style.overflow = "";
-    document.body.style.overflow = "";
-    document.documentElement.style.position = "";
-    document.documentElement.style.top = "";
-    document.documentElement.style.left = "";
-    document.documentElement.style.width = "";
-    document.documentElement.style.height = "";
+    setIsTransitioning(true);
 
-    console.log("✅ Scroll locks removed");
-
-    // Update state
-    setScrollMode("UNLOCKED");
-    setCurrentPhase("RESEARCH");
-
-    // Trigger research question immediately (no delay)
-    sessionStorage.setItem("phaseTransition", "true");
-    console.log("✅ Research phase transition triggered");
-
-    // Small scroll to get user started
+    // Start the slide-up animation
     setTimeout(() => {
-      window.scrollTo({
-        top: window.innerHeight * 0.1,
-        behavior: "smooth",
-      });
-      console.log("✅ Initial scroll initiated");
-    }, 200);
+      // Remove all scroll locks
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+      document.documentElement.style.position = "";
+      document.documentElement.style.top = "";
+      document.documentElement.style.left = "";
+      document.documentElement.style.width = "";
+      document.documentElement.style.height = "";
+
+      console.log("✅ Scroll locks removed");
+
+      // Update state
+      setScrollMode("UNLOCKED");
+      setCurrentPhase("RESEARCH");
+
+      // Trigger research question immediately (no delay)
+      sessionStorage.setItem("phaseTransition", "true");
+      console.log("✅ Research phase transition triggered");
+
+      // Small scroll to get user started
+      setTimeout(() => {
+        window.scrollTo({
+          top: window.innerHeight * 0.1,
+          behavior: "smooth",
+        });
+        console.log("✅ Initial scroll initiated");
+
+        // End transition state
+        setTimeout(() => {
+          setIsTransitioning(false);
+        }, 1000);
+      }, 200);
+    }, 100); // Small delay for smooth animation start
   }, []);
 
   // Listen for Map1 trigger
@@ -296,6 +309,49 @@ export default function HomePage() {
 
   return (
     <div className="globalinteriors-homepage">
+      {/* Debug Panel */}
+      <div
+        style={{
+          position: "fixed",
+          top: "10px",
+          left: "10px",
+          background: "rgba(0,0,0,0.9)",
+          color: "white",
+          padding: "15px",
+          borderRadius: "8px",
+          fontSize: "12px",
+          zIndex: 10001,
+          fontFamily: "monospace",
+        }}
+      >
+        <div>Scroll Mode: {scrollMode}</div>
+        <div>Phase: {currentPhase}</div>
+        <div>Transitioning: {isTransitioning ? "YES" : "NO"}</div>
+        <div>Scroll Y: {Math.round(scrollY)}px</div>
+        <div>Map1 Progress: {Math.round(mapProgress.map1 * 100)}%</div>
+        <div>Map2 Progress: {Math.round(mapProgress.map2 * 100)}%</div>
+        <div>Map3 Progress: {Math.round(mapProgress.map3 * 100)}%</div>
+        <div>Map4 Progress: {Math.round(mapProgress.map4 * 100)}%</div>
+        <div>Map5 Progress: {Math.round(mapProgress.map5 * 100)}%</div>
+        <div>Map6 Progress: {Math.round(mapProgress.map6 * 100)}%</div>
+        <div>Credits Progress: {Math.round(mapProgress.credits * 100)}%</div>
+        <button
+          onClick={handleTopFoldScroll}
+          style={{
+            marginTop: "10px",
+            padding: "8px 16px",
+            background: "#FF395C",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+            fontSize: "10px",
+          }}
+        >
+          MANUAL TRIGGER
+        </button>
+      </div>
+
       {/* Set document height for scrolling when unlocked */}
       <div
         style={{
@@ -307,21 +363,29 @@ export default function HomePage() {
           background: "#EEEEEE",
         }}
       >
-        {/* TopFold Section */}
-        {currentPhase === "TOPFOLD" && (
+        {/* TopFold Section - with smooth slide-up transition */}
+        {(currentPhase === "TOPFOLD" || isTransitioning) && (
           <div
             style={{
-              position: "relative",
+              position: "fixed",
+              top: 0,
+              left: 0,
               width: "100%",
               height: "100vh",
-              zIndex: 100,
+              zIndex: 200,
+              transform: isTransitioning
+                ? "translateY(-100vh)"
+                : "translateY(0)",
+              transition: isTransitioning
+                ? "transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+                : "none",
             }}
           >
             <TopFold onScrollTrigger={handleTopFoldScroll} />
           </div>
         )}
 
-        {/* Research Question Section - always mounted after research phase starts */}
+        {/* Research Question Section - normal behavior, no changes */}
         {(currentPhase === "RESEARCH" || currentPhase === "MAPS") && (
           <ResearchQuestion />
         )}
