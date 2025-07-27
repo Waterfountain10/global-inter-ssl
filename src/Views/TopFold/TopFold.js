@@ -97,12 +97,12 @@ const TopFold = ({ onScrollTrigger }) => {
 
       <img
         className="scl-logo"
-        src="assets/images/scl_logo_white.png"
+        src="public/assets/images/scl_logo_white.png"
         alt="Senseable City Lab"
       />
       <img
         className="mit-logo"
-        src="assets/images/mit_logo_white.png"
+        src="public/assets/images/mit_logo_white.png"
         alt="MIT"
       />
 
@@ -118,7 +118,7 @@ const TopFold = ({ onScrollTrigger }) => {
         <div className="scroll-text">Scroll to explore</div>
         <img
           className="scroll-icon"
-          src="assets/images/red_arrow.svg"
+          src="public/assets/images/red_arrow.svg"
           alt="Scroll Down"
         />
       </div>
