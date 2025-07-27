@@ -10,10 +10,10 @@ export default function ResearchQuestion() {
   const [showSearchBar, setShowSearchBar] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0); // 0 to 1
   const [isComplete, setIsComplete] = useState(false);
-  const [searchBarState, setSearchBarState] = useState("center"); // 'center', 'pinned', 'hidden', 'returning'
-  const [isReturningFromMaps, setIsReturningFromMaps] = useState(false);
+  const [searchBarState, setSearchBarState] = useState("center"); // 'center', 'pinned', 'floating'
+  const [containerMode, setContainerMode] = useState("fixed"); // 'fixed', 'floating'
 
-  // Check for triggers from HomePage and Maps phase returns
+  // Check for triggers from HomePage
   useEffect(() => {
     const checkTriggers = () => {
       if (sessionStorage.getItem("phaseTransition") === "true" && !isVisible) {
@@ -21,32 +21,6 @@ export default function ResearchQuestion() {
         setIsVisible(true);
         setShowSearchBar(true);
         sessionStorage.removeItem("phaseTransition");
-      }
-
-      // Check if we're returning from Maps phase
-      if (sessionStorage.getItem("returnToResearch") === "true") {
-        console.log(
-          "🔄 Returning from Maps - starting smooth return animation",
-        );
-        setIsReturningFromMaps(true);
-
-        // Sequence: First show search bar in hidden state, then animate to pinned
-        setTimeout(() => {
-          setIsVisible(true);
-          setShowSearchBar(true);
-          setScrollProgress(1); // Full text
-          setIsComplete(true);
-          setSearchBarState("returning"); // Special state for return animation
-        }, 300); // Small delay for Maps fade out
-
-        // Then animate to pinned state
-        setTimeout(() => {
-          setSearchBarState("pinned");
-          setIsReturningFromMaps(false);
-          console.log("✅ Return animation complete - search bar pinned");
-        }, 1200); // Wait for return animation
-
-        sessionStorage.removeItem("returnToResearch");
       }
     };
 
@@ -57,17 +31,13 @@ export default function ResearchQuestion() {
   // Function to trigger Map1 reveal
   const triggerMap1 = () => {
     console.log("🗺️ Triggering Map1 reveal");
-    setSearchBarState("hidden");
-
-    // Smoother hiding sequence
-    setTimeout(() => {
-      setShowSearchBar(false);
-    }, 400); // Wait for slide-up animation to start
+    setSearchBarState("floating");
+    setContainerMode("floating");
 
     setTimeout(() => {
       sessionStorage.setItem("showMap1", "true");
       console.log("🗺️ Map1 trigger set");
-    }, 800); // Wait for slide-up animation
+    }, 300);
   };
 
   // Scroll handler for typewriter effect and Map1 trigger
@@ -82,57 +52,42 @@ export default function ResearchQuestion() {
       const startScroll = windowHeight * 0.3;
       const endScroll = windowHeight * 2.0;
 
-      // Phase 2: Map1 trigger (2.5vh+)
-      const map1TriggerScroll = windowHeight * 2.5;
+      // Phase 2: Float up (2.5vh+)
+      const floatTriggerScroll = windowHeight * 2.5;
 
       if (scrollY < startScroll) {
-        // Only reset if we haven't triggered Map1 yet
-        if (searchBarState !== "hidden") {
-          setScrollProgress(0);
-          if (isComplete) {
-            setIsComplete(false);
-            setSearchBarState("center");
-            console.log("🔄 Reset typing state - scrolled back up");
-          }
+        setScrollProgress(0);
+        if (isComplete) {
+          setIsComplete(false);
+          setSearchBarState("center");
+          setContainerMode("fixed");
+          console.log("🔄 Reset typing state - scrolled back up");
         }
       } else if (scrollY >= startScroll && scrollY <= endScroll) {
-        // Typing phase - only if we haven't triggered Map1
-        if (searchBarState !== "hidden") {
-          const progress = (scrollY - startScroll) / (endScroll - startScroll);
-          setScrollProgress(Math.max(0, Math.min(1, progress)));
+        // Typing phase
+        const progress = (scrollY - startScroll) / (endScroll - startScroll);
+        setScrollProgress(Math.max(0, Math.min(1, progress)));
 
-          if (progress >= 1 && !isComplete) {
-            setIsComplete(true);
-            setSearchBarState("pinned");
-            console.log("✅ Scroll typing complete - search bar pinned");
-          }
+        if (progress >= 1 && !isComplete) {
+          setIsComplete(true);
+          setSearchBarState("pinned");
+          setContainerMode("fixed");
+          console.log("✅ Scroll typing complete - search bar pinned");
         }
       } else if (
-        scrollY > map1TriggerScroll &&
+        scrollY > floatTriggerScroll &&
         isComplete &&
-        searchBarState === "pinned"
+        containerMode === "fixed"
       ) {
-        // Map1 trigger phase - scroll works just like button click
-        console.log("🚀 Map1 trigger scroll reached");
+        // Float up phase
+        console.log("🚀 Float trigger scroll reached");
         triggerMap1();
-      }
-
-      // Handle reverse scroll from Map1 back to research
-      // If we're coming back from Map1, restore full text and pinned state
-      if (
-        scrollY < map1TriggerScroll &&
-        searchBarState === "hidden" &&
-        !isReturningFromMaps
-      ) {
-        console.log("🔄 Triggering return from Map1 via scroll");
-        // Trigger the smooth return sequence via HomePage
-        sessionStorage.setItem("triggerReturn", "true");
       }
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [showSearchBar, isComplete, searchBarState]);
+  }, [showSearchBar, isComplete, containerMode]);
 
   // Calculate typed text based on scroll progress
   const getTypedText = () => {
@@ -147,28 +102,84 @@ export default function ResearchQuestion() {
     }
   };
 
+  // Calculate search bar position based on mode and scroll
+  const getSearchBarStyle = () => {
+    const baseStyle = {
+      position: "fixed",
+      background: "#ffffff",
+      backdropFilter: "blur(10px)",
+      width: window.innerWidth <= 768 ? "90%" : "80%",
+      maxWidth: window.innerWidth <= 768 ? "none" : "1050px",
+      padding: window.innerWidth <= 768 ? "6px" : "8px",
+      borderRadius: window.innerWidth <= 768 ? "50px" : "60px",
+      boxShadow:
+        "0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)",
+      display: "flex",
+      alignItems: "center",
+      left: "50%",
+      zIndex: 10000,
+      transition: "all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+    };
+
+    if (searchBarState === "center") {
+      return {
+        ...baseStyle,
+        top: "50%",
+        transform: "translate(-50%, -50%)",
+        opacity: 1,
+      };
+    } else if (searchBarState === "pinned") {
+      return {
+        ...baseStyle,
+        top: window.innerWidth <= 768 ? "60px" : "80px",
+        transform: "translateX(-50%)",
+        opacity: 1,
+      };
+    } else if (searchBarState === "floating") {
+      const scrollY = window.pageYOffset;
+      const windowHeight = window.innerHeight;
+      const floatStartScroll = windowHeight * 2.5;
+      const floatProgress = Math.min(
+        1,
+        Math.max(0, (scrollY - floatStartScroll) / (windowHeight * 0.5)),
+      );
+
+      return {
+        ...baseStyle,
+        top: window.innerWidth <= 768 ? "60px" : "80px",
+        transform: `translateX(-50%) translateY(${-floatProgress * 200}px)`,
+        opacity: Math.max(0.3, 1 - floatProgress * 0.7),
+      };
+    }
+
+    return baseStyle;
+  };
+
   return (
     <>
-      {/* Main container */}
+      {/* Main container - transitions from fixed to allowing scroll */}
       <div
         ref={containerRef}
         className="research-question"
         style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
+          position: containerMode === "fixed" ? "fixed" : "relative",
+          top: containerMode === "fixed" ? 0 : "auto",
+          left: containerMode === "fixed" ? 0 : "auto",
           width: "100%",
-          height: "100vh",
+          height: containerMode === "fixed" ? "100vh" : "auto",
+          minHeight: containerMode === "floating" ? "100vh" : "auto",
           background: "#EEEEEE",
-          zIndex: 80,
+          zIndex: containerMode === "fixed" ? 80 : 20,
           opacity: isVisible ? 1 : 0,
-          transition: "opacity 0.5s ease",
+          transition: "opacity 0.5s ease, z-index 0.3s ease",
+          overflow: containerMode === "fixed" ? "hidden" : "visible",
         }}
       >
         {/* Scroll instruction - mobile responsive and context aware */}
         {showSearchBar &&
           scrollProgress < 0.05 &&
-          searchBarState === "center" && (
+          searchBarState === "center" &&
+          containerMode === "fixed" && (
             <div
               style={{
                 position: "absolute",
@@ -207,90 +218,51 @@ export default function ResearchQuestion() {
           )}
 
         {/* Continue instruction - shows when typing is complete */}
-        {showSearchBar && isComplete && searchBarState === "pinned" && (
-          <div
-            style={{
-              position: "absolute",
-              bottom: window.innerWidth <= 768 ? "20%" : "25%",
-              left: "50%",
-              transform: "translateX(-50%)",
-              textAlign: "center",
-              color: "#666",
-              fontSize: window.innerWidth <= 768 ? "1rem" : "1.1rem",
-              zIndex: 100,
-              opacity: 0.8,
-              padding: "0 20px",
-              maxWidth: "90%",
-            }}
-          >
+        {showSearchBar &&
+          isComplete &&
+          searchBarState === "pinned" &&
+          containerMode === "fixed" && (
             <div
               style={{
-                marginBottom: "10px",
-                lineHeight: 1.4,
+                position: "absolute",
+                bottom: window.innerWidth <= 768 ? "20%" : "25%",
+                left: "50%",
+                transform: "translateX(-50%)",
+                textAlign: "center",
+                color: "#666",
+                fontSize: window.innerWidth <= 768 ? "1rem" : "1.1rem",
+                zIndex: 100,
+                opacity: 0.8,
+                padding: "0 20px",
+                maxWidth: "90%",
               }}
             >
-              {window.innerWidth <= 768
-                ? "Continue scrolling or click button"
-                : "Continue scrolling or click the button to explore"}
+              <div
+                style={{
+                  marginBottom: "10px",
+                  lineHeight: 1.4,
+                }}
+              >
+                {window.innerWidth <= 768
+                  ? "Continue scrolling to explore"
+                  : "Continue scrolling or click the button to explore the maps"}
+              </div>
+              <div
+                style={{
+                  fontSize: window.innerWidth <= 768 ? "1.5rem" : "1.8rem",
+                  color: "#FF395C",
+                  animation: "bounce 2s infinite",
+                }}
+              >
+                ↓
+              </div>
             </div>
-            <div
-              style={{
-                fontSize: window.innerWidth <= 768 ? "1.5rem" : "1.8rem",
-                color: "#FF395C",
-                animation: "bounce 2s infinite",
-              }}
-            >
-              ↓
-            </div>
-          </div>
-        )}
+          )}
       </div>
 
-      {/* Persistent Search Bar - scroll controlled, mobile responsive, and smooth return animation */}
+      {/* Persistent Search Bar - scroll controlled and mobile responsive */}
       {showSearchBar && (
-        <div
-          style={{
-            position: "fixed",
-            background: "#ffffff",
-            backdropFilter: "blur(10px)",
-            width: window.innerWidth <= 768 ? "90%" : "80%",
-            maxWidth: window.innerWidth <= 768 ? "none" : "1050px",
-            padding: window.innerWidth <= 768 ? "6px" : "8px",
-            borderRadius: window.innerWidth <= 768 ? "50px" : "60px",
-            boxShadow:
-              "0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)",
-            display: "flex",
-            alignItems: "center",
-            top:
-              searchBarState === "pinned"
-                ? window.innerWidth <= 768
-                  ? "60px"
-                  : "80px"
-                : searchBarState === "hidden"
-                  ? "-200px"
-                  : searchBarState === "returning"
-                    ? "200px"
-                    : "50%",
-            left: "50%",
-            transform:
-              searchBarState === "pinned" ||
-              searchBarState === "hidden" ||
-              searchBarState === "returning"
-                ? "translateX(-50%)"
-                : "translate(-50%, -50%)",
-            transition:
-              searchBarState === "returning"
-                ? "all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
-                : "all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-            zIndex: 10000,
-            opacity:
-              searchBarState === "hidden"
-                ? 0
-                : searchBarState === "returning"
-                  ? 0.8
-                  : 1,
-          }}
-        >
+        <div style={getSearchBarStyle()}>
           <span
             style={{
               color: "#393939",
@@ -311,7 +283,7 @@ export default function ResearchQuestion() {
             }}
           >
             {getTypedText()}
-            {scrollProgress > 0 && scrollProgress < 1 && !isComplete && (
+            {scrollProgress > 0 && scrollProgress < 1 && (
               <span
                 style={{
                   animation: "blink 1s step-end infinite",
@@ -371,6 +343,7 @@ export default function ResearchQuestion() {
         <div>Visible: {isVisible ? "YES" : "NO"}</div>
         <div>Show Bar: {showSearchBar ? "YES" : "NO"}</div>
         <div>Search State: {searchBarState}</div>
+        <div>Container Mode: {containerMode}</div>
         <div>Scroll Progress: {Math.round(scrollProgress * 100)}%</div>
         <div>Complete: {isComplete ? "YES" : "NO"}</div>
         <div>Scroll Y: {Math.round(window.pageYOffset)}px</div>

@@ -3,11 +3,17 @@ import React, { useState, useEffect, useCallback } from "react";
 import "./HomePage.css";
 import TopFold from "../TopFold/TopFold";
 import ResearchQuestion from "../ResearchQuestion/ResearchQuestion";
+import Map1 from "../Map1/Map1";
+import Map2 from "../Map2/Map2";
 
 export default function HomePage() {
   const [scrollMode, setScrollMode] = useState("LOCKED"); // LOCKED, UNLOCKED
   const [currentPhase, setCurrentPhase] = useState("TOPFOLD"); // TOPFOLD, RESEARCH, MAPS
   const [scrollY, setScrollY] = useState(0);
+  const [mapProgress, setMapProgress] = useState({
+    map1: 0,
+    map2: 0,
+  });
 
   // Initialize with complete scroll lock
   useEffect(() => {
@@ -75,10 +81,9 @@ export default function HomePage() {
     }, 200);
   }, []);
 
-  // Listen for Map1 trigger and return triggers
+  // Listen for Map1 trigger
   useEffect(() => {
-    const checkTriggers = () => {
-      // Forward: Research → Maps
+    const checkMapTrigger = () => {
       if (
         sessionStorage.getItem("showMap1") === "true" &&
         currentPhase === "RESEARCH"
@@ -91,50 +96,54 @@ export default function HomePage() {
         document.documentElement.style.overflow = "";
         document.body.style.overflow = "";
       }
-
-      // Reverse: Maps → Research (triggered by ResearchQuestion scroll detection)
-      if (
-        sessionStorage.getItem("triggerReturn") === "true" &&
-        currentPhase === "MAPS"
-      ) {
-        console.log(
-          "🔄 Return triggered - starting smooth transition back to Research",
-        );
-        sessionStorage.removeItem("triggerReturn");
-
-        // Start the reverse sequence: Maps fade out → Research fade in
-        setTimeout(() => {
-          setCurrentPhase("RESEARCH");
-          sessionStorage.setItem("returnToResearch", "true");
-        }, 600); // Wait for Map content to fade out
-      }
     };
 
-    const interval = setInterval(checkTriggers, 100);
+    const interval = setInterval(checkMapTrigger, 100);
     return () => clearInterval(interval);
   }, [currentPhase]);
 
-  // Scroll handler for when unlocked - enhanced with reverse navigation
+  // Scroll handler for when unlocked - calculate map progress
   useEffect(() => {
     if (scrollMode !== "UNLOCKED") return;
 
     const handleScroll = () => {
-      const newScrollY = window.pageYOffset;
-      setScrollY(newScrollY);
-
-      // Handle phase transitions based on scroll position
+      const scrollY = window.pageYOffset;
       const windowHeight = window.innerHeight;
 
-      // If we're in MAPS phase and scroll back up significantly, return to RESEARCH
-      if (currentPhase === "MAPS" && newScrollY < windowHeight * 1.5) {
-        console.log("🔄 Scrolled back from Maps to Research");
-        setCurrentPhase("RESEARCH");
-        sessionStorage.setItem("returnToResearch", "true");
-      }
-      // If we're in RESEARCH phase and scroll down significantly, go to MAPS
-      else if (currentPhase === "RESEARCH" && newScrollY > windowHeight * 2.5) {
-        console.log("🚀 Scrolled forward from Research to Maps");
-        setCurrentPhase("MAPS");
+      setScrollY(scrollY);
+
+      // Calculate map progress based on scroll position
+      if (currentPhase === "MAPS") {
+        // Map1 becomes active after research question phase (around 3vh)
+        const map1StartScroll = windowHeight * 3;
+        const map1EndScroll = windowHeight * 5;
+
+        // Map2 starts after Map1
+        const map2StartScroll = windowHeight * 5;
+        const map2EndScroll = windowHeight * 7;
+
+        // Calculate Map1 progress
+        let map1Progress = 0;
+        if (scrollY >= map1StartScroll && scrollY <= map1EndScroll) {
+          map1Progress =
+            (scrollY - map1StartScroll) / (map1EndScroll - map1StartScroll);
+        } else if (scrollY > map1EndScroll) {
+          map1Progress = 1;
+        }
+
+        // Calculate Map2 progress
+        let map2Progress = 0;
+        if (scrollY >= map2StartScroll && scrollY <= map2EndScroll) {
+          map2Progress =
+            (scrollY - map2StartScroll) / (map2EndScroll - map2StartScroll);
+        } else if (scrollY > map2EndScroll) {
+          map2Progress = 1;
+        }
+
+        setMapProgress({
+          map1: Math.max(0, Math.min(1, map1Progress)),
+          map2: Math.max(0, Math.min(1, map2Progress)),
+        });
       }
     };
 
@@ -162,6 +171,8 @@ export default function HomePage() {
         <div>Scroll Mode: {scrollMode}</div>
         <div>Phase: {currentPhase}</div>
         <div>Scroll Y: {Math.round(scrollY)}px</div>
+        <div>Map1 Progress: {Math.round(mapProgress.map1 * 100)}%</div>
+        <div>Map2 Progress: {Math.round(mapProgress.map2 * 100)}%</div>
         <button
           onClick={handleTopFoldScroll}
           style={{
@@ -183,7 +194,7 @@ export default function HomePage() {
       <div
         style={{
           height:
-            scrollMode === "UNLOCKED" ? `${window.innerHeight * 9}px` : "100vh", // Extended height for all maps
+            scrollMode === "UNLOCKED" ? `${window.innerHeight * 8}px` : "100vh", // Increased for more scroll space
           position: "relative",
           background: "#EEEEEE",
         }}
@@ -204,25 +215,13 @@ export default function HomePage() {
 
         {/* Research Question Section - always mounted after research phase starts */}
         {(currentPhase === "RESEARCH" || currentPhase === "MAPS") && (
-          <div
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100vh",
-              zIndex: currentPhase === "RESEARCH" ? 90 : 30,
-              background: "#EEEEEE",
-            }}
-          >
-            <ResearchQuestion />
-          </div>
+          <ResearchQuestion />
         )}
 
-        {/* Maps Section - additional content over ResearchQuestion */}
+        {/* Maps Section - layered over ResearchQuestion */}
         {currentPhase === "MAPS" && (
           <>
-            {/* World Map Background with smooth reverse fade */}
+            {/* World Map Background - persistent */}
             <div
               style={{
                 position: "fixed",
@@ -230,14 +229,17 @@ export default function HomePage() {
                 left: 0,
                 width: "100%",
                 height: "100vh",
-                zIndex: 40,
-                opacity:
-                  sessionStorage.getItem("triggerReturn") === "true" ? 0 : 0.8,
+                zIndex: 15,
+                opacity: Math.min(
+                  0.6,
+                  Math.max(
+                    0,
+                    (scrollY - window.innerHeight * 2.5) /
+                      (window.innerHeight * 0.5),
+                  ),
+                ),
                 pointerEvents: "none",
-                transition:
-                  sessionStorage.getItem("triggerReturn") === "true"
-                    ? "opacity 0.8s ease-out 0.3s"
-                    : "opacity 0.8s ease", // Delay for reverse
+                transition: "opacity 0.3s ease",
               }}
             >
               <img
@@ -251,514 +253,67 @@ export default function HomePage() {
               />
             </div>
 
-            {/* Map1 Overlay - appears above world map */}
-            <div
-              style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100vh",
-                zIndex: 45,
-                opacity:
-                  scrollY >= window.innerHeight * 2.5 &&
-                  scrollY < window.innerHeight * 3.5
-                    ? 1
-                    : 0,
-                pointerEvents: "none",
-                transition: "opacity 0.5s ease",
-              }}
-            >
-              <img
-                src="/assets/images/map1_final.svg"
-                alt="Map1 overlay"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                }}
-              />
-            </div>
-
-            {/* Map1 Content - scroll responsive with smooth fade out on reverse */}
-            <div
-              style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100vh",
-                zIndex: 50,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                pointerEvents: "none",
-                opacity:
-                  sessionStorage.getItem("triggerReturn") === "true"
-                    ? 0
-                    : scrollY >= window.innerHeight * 2.5 &&
-                        scrollY < window.innerHeight * 3.5
-                      ? 1
-                      : 0,
-                transition:
-                  sessionStorage.getItem("triggerReturn") === "true"
-                    ? "opacity 0.6s ease-out"
-                    : "opacity 0.5s ease",
-              }}
-            >
+            {/* Map1 Component */}
+            {mapProgress.map1 > 0 && (
               <div
                 style={{
-                  background: "rgba(255,255,255,0.35)",
-                  backdropFilter: "blur(10px)",
-                  padding: "36px 48px",
-                  borderRadius: "40px",
-                  boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
-                  maxWidth: "700px",
-                  textAlign: "center",
-                  fontSize: "1.6rem",
-                  fontWeight: "500",
-                  color: "#333",
-                  pointerEvents: "auto",
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100vh",
+                  zIndex: 20,
+                  pointerEvents: "none",
                 }}
               >
-                <p>
-                  The question of whether and how global pressures reduce or
-                  eliminate{" "}
-                  <span style={{ color: "#FF395C", fontWeight: "bold" }}>
-                    local cultural distinctiveness
-                  </span>{" "}
-                  has been the subject of considerable research.
-                </p>
+                <Map1
+                  scrollProgress={mapProgress.map1}
+                  isActive={mapProgress.map1 > 0.1}
+                />
               </div>
-            </div>
+            )}
 
-            {/* Map2 Overlay - appears above world map */}
-            <div
-              style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100vh",
-                zIndex: 45,
-                opacity:
-                  scrollY >= window.innerHeight * 3.5 &&
-                  scrollY < window.innerHeight * 4.5
-                    ? 1
-                    : 0,
-                pointerEvents: "none",
-                transition: "opacity 0.5s ease",
-              }}
-            >
-              <img
-                src="/assets/images/map2_final.svg"
-                alt="Map2 overlay"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                }}
-              />
-            </div>
-
-            {/* Map2 Content */}
-            <div
-              style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100vh",
-                zIndex: 50,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                pointerEvents: "none",
-                opacity:
-                  scrollY >= window.innerHeight * 3.5 &&
-                  scrollY < window.innerHeight * 4.5
-                    ? 1
-                    : 0,
-                transition: "opacity 0.5s ease",
-              }}
-            >
+            {/* Map2 Component */}
+            {mapProgress.map2 > 0 && (
               <div
                 style={{
-                  background: "rgba(255,255,255,0.35)",
-                  backdropFilter: "blur(10px)",
-                  padding: "36px 48px",
-                  borderRadius: "40px",
-                  boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
-                  maxWidth: "700px",
-                  textAlign: "center",
-                  fontSize: "1.6rem",
-                  fontWeight: "500",
-                  color: "#333",
-                  pointerEvents: "auto",
-                }}
-              >
-                <p>
-                  To answer this, we used a{" "}
-                  <span style={{ color: "#FF395C", fontWeight: "bold" }}>
-                    visual AI model
-                  </span>{" "}
-                  to analyze a unique dataset of over{" "}
-                  <span style={{ color: "#FF395C", fontWeight: "bold" }}>
-                    400k indoor images
-                  </span>
-                  .
-                </p>
-              </div>
-            </div>
-
-            {/* Map3 Overlay */}
-            <div
-              style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100vh",
-                zIndex: 45,
-                opacity:
-                  scrollY >= window.innerHeight * 4.5 &&
-                  scrollY < window.innerHeight * 5.5
-                    ? 1
-                    : 0,
-                pointerEvents: "none",
-                transition: "opacity 0.5s ease",
-              }}
-            >
-              <img
-                src="/assets/images/map3_final.svg"
-                alt="Map3 overlay"
-                style={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
                   width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                }}
-              />
-            </div>
-
-            {/* Map3 Content */}
-            <div
-              style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100vh",
-                zIndex: 50,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                pointerEvents: "none",
-                opacity:
-                  scrollY >= window.innerHeight * 4.5 &&
-                  scrollY < window.innerHeight * 5.5
-                    ? 1
-                    : 0,
-                transition: "opacity 0.5s ease",
-              }}
-            >
-              <div
-                style={{
-                  background: "rgba(255,255,255,0.35)",
-                  backdropFilter: "blur(10px)",
-                  padding: "36px 48px",
-                  borderRadius: "40px",
-                  boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
-                  maxWidth: "700px",
-                  textAlign: "center",
-                  fontSize: "1.6rem",
-                  fontWeight: "500",
-                  color: "#333",
-                  pointerEvents: "auto",
+                  height: "100vh",
+                  zIndex: 25,
+                  pointerEvents: "none",
                 }}
               >
-                <p>
-                  To study the{" "}
-                  <span style={{ color: "#FF395C", fontWeight: "bold" }}>
-                    patterns of similarity
-                  </span>{" "}
-                  between kitchens, living rooms, bedrooms, and bathrooms across{" "}
-                  <span style={{ color: "#FF395C", fontWeight: "bold" }}>
-                    80 global cities
-                  </span>
-                  .
-                </p>
+                <Map2
+                  scrollProgress={mapProgress.map2}
+                  isActive={mapProgress.map2 > 0.1}
+                />
               </div>
-            </div>
-
-            {/* Map4 Overlay */}
-            <div
-              style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100vh",
-                zIndex: 45,
-                opacity:
-                  scrollY >= window.innerHeight * 5.5 &&
-                  scrollY < window.innerHeight * 6.5
-                    ? 1
-                    : 0,
-                pointerEvents: "none",
-                transition: "opacity 0.5s ease",
-              }}
-            >
-              <img
-                src="/assets/images/map4_final.svg"
-                alt="Map4 overlay"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                }}
-              />
-            </div>
-
-            {/* Map4 Content */}
-            <div
-              style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100vh",
-                zIndex: 50,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                pointerEvents: "none",
-                opacity:
-                  scrollY >= window.innerHeight * 5.5 &&
-                  scrollY < window.innerHeight * 6.5
-                    ? 1
-                    : 0,
-                transition: "opacity 0.5s ease",
-              }}
-            >
-              <div
-                style={{
-                  background: "rgba(255,255,255,0.35)",
-                  backdropFilter: "blur(10px)",
-                  padding: "36px 48px",
-                  borderRadius: "40px",
-                  boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
-                  maxWidth: "700px",
-                  textAlign: "center",
-                  fontSize: "1.6rem",
-                  fontWeight: "500",
-                  color: "#333",
-                  pointerEvents: "auto",
-                }}
-              >
-                <p>
-                  Using deep learning, we demonstrate that{" "}
-                  <span style={{ color: "#FF395C", fontWeight: "bold" }}>
-                    geographic proximity
-                  </span>{" "}
-                  and{" "}
-                  <span style={{ color: "#FF395C", fontWeight: "bold" }}>
-                    degree of globalization
-                  </span>{" "}
-                  significantly correlate with the visual characteristics of
-                  indoor spaces.
-                </p>
-              </div>
-            </div>
-
-            {/* Map5 Overlay */}
-            <div
-              style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100vh",
-                zIndex: 45,
-                opacity:
-                  scrollY >= window.innerHeight * 6.5 &&
-                  scrollY < window.innerHeight * 7.5
-                    ? 1
-                    : 0,
-                pointerEvents: "none",
-                transition: "opacity 0.5s ease",
-              }}
-            >
-              <img
-                src="/assets/images/map5_final.svg"
-                alt="Map5 overlay"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                }}
-              />
-            </div>
-
-            {/* Map5 Content */}
-            <div
-              style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100vh",
-                zIndex: 50,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                pointerEvents: "none",
-                opacity:
-                  scrollY >= window.innerHeight * 6.5 &&
-                  scrollY < window.innerHeight * 7.5
-                    ? 1
-                    : 0,
-                transition: "opacity 0.5s ease",
-              }}
-            >
-              <div
-                style={{
-                  background: "rgba(255,255,255,0.35)",
-                  backdropFilter: "blur(10px)",
-                  padding: "36px 48px",
-                  borderRadius: "40px",
-                  boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
-                  maxWidth: "700px",
-                  textAlign: "center",
-                  fontSize: "1.6rem",
-                  fontWeight: "500",
-                  color: "#333",
-                  pointerEvents: "auto",
-                }}
-              >
-                <p>
-                  Revealing that certain{" "}
-                  <span style={{ color: "#FF395C", fontWeight: "bold" }}>
-                    objects
-                  </span>{" "}
-                  — either through their presence or unique appearance — serve
-                  as{" "}
-                  <span style={{ color: "#FF395C", fontWeight: "bold" }}>
-                    markers of visual identity
-                  </span>
-                  .
-                </p>
-              </div>
-            </div>
-
-            {/* Map6 Overlay */}
-            <div
-              style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100vh",
-                zIndex: 45,
-                opacity: scrollY >= window.innerHeight * 7.5 ? 1 : 0,
-                pointerEvents: "none",
-                transition: "opacity 0.5s ease",
-              }}
-            >
-              <img
-                src="/assets/images/map6_final.svg"
-                alt="Map6 overlay"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                }}
-              />
-            </div>
-
-            {/* Map6 Content */}
-            <div
-              style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100vh",
-                zIndex: 50,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                pointerEvents: "none",
-                opacity: scrollY >= window.innerHeight * 7.5 ? 1 : 0,
-                transition: "opacity 0.5s ease",
-              }}
-            >
-              <div
-                style={{
-                  background: "rgba(255,255,255,0.35)",
-                  backdropFilter: "blur(10px)",
-                  padding: "36px 48px",
-                  borderRadius: "40px",
-                  boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
-                  maxWidth: "700px",
-                  textAlign: "center",
-                  fontSize: "1.6rem",
-                  fontWeight: "500",
-                  color: "#333",
-                  pointerEvents: "auto",
-                }}
-              >
-                <p>
-                  Our findings show that despite global pressures and trends
-                  towards cultural homogenization,{" "}
-                  <span style={{ color: "#FF395C", fontWeight: "bold" }}>
-                    local cultural identities nevertheless remain
-                  </span>
-                  .
-                </p>
-              </div>
-            </div>
+            )}
           </>
         )}
 
-        {/* Scrollable sections for demonstration */}
-        {scrollMode === "UNLOCKED" && (
-          <>
-            <div
-              style={{
-                position: "absolute",
-                top: `${window.innerHeight * 2}px`,
-                width: "100%",
-                height: "100vh",
-                background: "#4CAF50",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "white",
-                fontSize: "2rem",
-                zIndex: 10,
-              }}
-            >
-              MAP 2 PLACEHOLDER
-            </div>
-
-            <div
-              style={{
-                position: "absolute",
-                top: `${window.innerHeight * 3}px`,
-                width: "100%",
-                height: "100vh",
-                background: "#2196F3",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "white",
-                fontSize: "2rem",
-                zIndex: 10,
-              }}
-            >
-              MAP 3 PLACEHOLDER
-            </div>
-          </>
+        {/* Additional placeholder content for extended scrolling */}
+        {scrollMode === "UNLOCKED" && currentPhase === "MAPS" && (
+          <div
+            style={{
+              position: "absolute",
+              top: `${window.innerHeight * 7}px`,
+              width: "100%",
+              height: "100vh",
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "white",
+              fontSize: "2rem",
+              zIndex: 10,
+            }}
+          >
+            CREDITS SECTION PLACEHOLDER
+          </div>
         )}
       </div>
     </div>
