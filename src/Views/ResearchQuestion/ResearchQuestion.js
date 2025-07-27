@@ -218,6 +218,76 @@ export default function ResearchQuestion() {
     return baseStyle;
   };
 
+  // Calculate instruction text position relative to search bar
+  const getInstructionTextStyle = () => {
+    const baseStyle = {
+      position: "fixed", // Changed from absolute to fixed
+      left: "50%",
+      transform: "translateX(-50%)",
+      textAlign: "center",
+      color: "#666",
+      fontSize: window.innerWidth <= 768 ? "1rem" : "1.1rem",
+      zIndex: 100,
+      opacity: 0,
+      padding: "0 20px",
+      maxWidth: "90%",
+      animation: "slowFadeIn 2s ease-out forwards",
+    };
+
+    if (searchBarState === "center") {
+      // Position above the centered search bar
+      return {
+        ...baseStyle,
+        top: "calc(50% - 120px)", // 120px above the search bar center
+      };
+    } else if (searchBarState === "pinned") {
+      // Position above the pinned search bar
+      return {
+        ...baseStyle,
+        top:
+          window.innerWidth <= 768 ? "calc(60px - 80px)" : "calc(80px - 100px)", // Above pinned search bar
+      };
+    }
+
+    return baseStyle;
+  };
+
+  // Calculate continue instruction position relative to search bar
+  const getContinueInstructionStyle = () => {
+    const baseStyle = {
+      position: "fixed", // Changed from absolute to fixed
+      left: "50%",
+      transform: "translateX(-50%)",
+      textAlign: "center",
+      color: "#666",
+      fontSize: window.innerWidth <= 768 ? "1rem" : "1.1rem",
+      zIndex: 100,
+      opacity: 0,
+      padding: "0 20px",
+      maxWidth: "90%",
+      animation: "slowFadeIn 1.5s ease-out forwards",
+    };
+
+    if (searchBarState === "center") {
+      // Position below the centered search bar
+      return {
+        ...baseStyle,
+        top: "calc(50% + 120px)", // 120px below the search bar center
+      };
+    } else if (searchBarState === "pinned") {
+      // Position below the pinned search bar
+      return {
+        ...baseStyle,
+        top:
+          window.innerWidth <= 768
+            ? "calc(60px + 100px)"
+            : "calc(80px + 120px)", // Below pinned search bar
+      };
+    }
+
+    return baseStyle;
+  };
+
   return (
     <>
       {/* Main container */}
@@ -238,27 +308,12 @@ export default function ResearchQuestion() {
           overflow: containerMode === "fixed" ? "hidden" : "visible",
         }}
       >
-        {/* Scroll instruction */}
+        {/* Scroll instruction - positioned relative to search bar */}
         {showSearchBar &&
           scrollProgress < 0.02 &&
           searchBarState === "center" &&
           containerMode === "fixed" && (
-            <div
-              style={{
-                position: "absolute",
-                top: window.innerWidth <= 768 ? "30%" : "35%",
-                left: "50%",
-                transform: "translateX(-50%)",
-                textAlign: "center",
-                color: "#666",
-                fontSize: window.innerWidth <= 768 ? "1rem" : "1.1rem",
-                zIndex: 100,
-                opacity: 0,
-                padding: "0 20px",
-                maxWidth: "90%",
-                animation: "slowFadeIn 2s ease-out forwards",
-              }}
-            >
+            <div style={getInstructionTextStyle()}>
               <div style={{ marginBottom: "10px", lineHeight: 1.4 }}>
                 {window.innerWidth <= 768
                   ? "Scroll to reveal the question"
@@ -276,27 +331,12 @@ export default function ResearchQuestion() {
             </div>
           )}
 
-        {/* Continue instruction */}
+        {/* Continue instruction - positioned relative to search bar */}
         {showSearchBar &&
           isComplete &&
           searchBarState === "pinned" &&
           containerMode === "fixed" && (
-            <div
-              style={{
-                position: "absolute",
-                bottom: window.innerWidth <= 768 ? "20%" : "25%",
-                left: "50%",
-                transform: "translateX(-50%)",
-                textAlign: "center",
-                color: "#666",
-                fontSize: window.innerWidth <= 768 ? "1rem" : "1.1rem",
-                zIndex: 100,
-                opacity: 0,
-                padding: "0 20px",
-                maxWidth: "90%",
-                animation: "slowFadeIn 1.5s ease-out forwards",
-              }}
-            >
+            <div style={getContinueInstructionStyle()}>
               <div style={{ marginBottom: "10px", lineHeight: 1.4 }}>
                 {window.innerWidth <= 768
                   ? "Continue scrolling to explore"
@@ -386,11 +426,11 @@ export default function ResearchQuestion() {
         @keyframes slowFadeIn {
           0% {
             opacity: 0;
-            transform: translateY(20px) scale(0.95);
+            transform: translateX(-50%) translateY(20px) scale(0.95);
           }
           100% {
             opacity: 1;
-            transform: translateY(0) scale(1);
+            transform: translateX(-50%) translateY(0) scale(1);
           }
         }
 
