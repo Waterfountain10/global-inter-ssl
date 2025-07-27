@@ -98,9 +98,22 @@ export default function HomePage() {
       }
     };
 
-    const interval = setInterval(checkMapTrigger, 100);
+    const interval = setInterval(checkMapTrigger, 50); // Check more frequently
     return () => clearInterval(interval);
   }, [currentPhase]);
+
+  // Also check for direct scroll-based phase transition as backup
+  useEffect(() => {
+    if (scrollMode === "UNLOCKED" && currentPhase === "RESEARCH") {
+      const windowHeight = window.innerHeight;
+      const mapTriggerScroll = windowHeight * 2.5;
+
+      if (scrollY > mapTriggerScroll) {
+        console.log("🗺️ Direct scroll trigger - transitioning to MAPS");
+        setCurrentPhase("MAPS");
+      }
+    }
+  }, [scrollY, scrollMode, currentPhase]);
 
   // Scroll handler for when unlocked - calculate map progress
   useEffect(() => {

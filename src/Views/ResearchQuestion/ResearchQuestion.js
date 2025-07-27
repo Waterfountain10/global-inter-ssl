@@ -74,14 +74,21 @@ export default function ResearchQuestion() {
           setContainerMode("fixed");
           console.log("✅ Scroll typing complete - search bar pinned");
         }
-      } else if (
-        scrollY > floatTriggerScroll &&
-        isComplete &&
-        containerMode === "fixed"
-      ) {
-        // Float up phase
-        console.log("🚀 Float trigger scroll reached");
-        triggerMap1();
+      } else if (scrollY > endScroll) {
+        // Beyond typing range - ensure completion
+        if (!isComplete) {
+          setScrollProgress(1);
+          setIsComplete(true);
+          setSearchBarState("pinned");
+          setContainerMode("fixed");
+          console.log("✅ Force complete typing - scrolled beyond range");
+        }
+
+        if (scrollY > floatTriggerScroll && containerMode === "fixed") {
+          // Float up phase
+          console.log("🚀 Float trigger scroll reached");
+          triggerMap1();
+        }
       }
     };
 
