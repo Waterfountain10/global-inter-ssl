@@ -1,4 +1,4 @@
-// src/Views/HomePage.js
+// src/Views/HomePage.js - Updated Credits calculation
 import React, { useState, useEffect, useCallback } from "react";
 import "./HomePage.css";
 import TopFold from "../TopFold/TopFold";
@@ -159,11 +159,11 @@ export default function HomePage() {
 
         // Map6 starts after Map5
         const map6StartScroll = windowHeight * 13;
-        const map6EndScroll = windowHeight * 14.5; // Shortened Map6 range
+        const map6EndScroll = windowHeight * 14.5;
 
-        // Credits starts earlier, overlapping with end of Map6
-        const creditsStartScroll = windowHeight * 14;
-        const creditsEndScroll = windowHeight * 16;
+        // Credits starts much earlier and takes more space for proper animation
+        const creditsStartScroll = windowHeight * 13.5; // Start overlapping with Map6
+        const creditsEndScroll = windowHeight * 17; // Extended end for more scroll space
 
         // Calculate Map1 progress
         let map1Progress = 0;
@@ -261,7 +261,7 @@ export default function HomePage() {
           map6Progress = 1 - fadeOutProgress;
         }
 
-        // Calculate Credits progress
+        // Calculate Credits progress with enhanced animation range
         let creditsProgress = 0;
         if (scrollY >= creditsStartScroll && scrollY <= creditsEndScroll) {
           creditsProgress =
@@ -322,8 +322,8 @@ export default function HomePage() {
         <div>Map6 Progress: {Math.round(mapProgress.map6 * 100)}%</div>
         <div>Credits Progress: {Math.round(mapProgress.credits * 100)}%</div>
         <div>Window Height: {window.innerHeight}px</div>
-        <div>Credits Start: {window.innerHeight * 14}px</div>
-        <div>Credits End: {window.innerHeight * 16}px</div>
+        <div>Credits Start: {window.innerHeight * 13.5}px</div>
+        <div>Credits End: {window.innerHeight * 17}px</div>
         <button
           onClick={handleTopFoldScroll}
           style={{
@@ -346,8 +346,8 @@ export default function HomePage() {
         style={{
           height:
             scrollMode === "UNLOCKED"
-              ? `${window.innerHeight * 16}px`
-              : "100vh", // Increased for all 6 maps + extra space
+              ? `${window.innerHeight * 18}px` // Increased for extended Credits section
+              : "100vh",
           position: "relative",
           background: "#EEEEEE",
         }}
@@ -525,7 +525,8 @@ export default function HomePage() {
                 />
               </div>
             )}
-            {/* Credits Component */}
+
+            {/* Credits Component - Enhanced with proper interaction and positioning */}
             {mapProgress.credits > 0 && (
               <div
                 style={{
@@ -534,27 +535,27 @@ export default function HomePage() {
                   left: 0,
                   width: "100%",
                   height: "100vh",
-                  zIndex: 50,
-                  pointerEvents: "auto", // Always allow interaction across full screen
+                  zIndex: 60, // Higher z-index to ensure it's on top
+                  pointerEvents: mapProgress.credits > 0.3 ? "auto" : "none", // Enable interaction when visible
                 }}
               >
                 <Credits
                   scrollProgress={mapProgress.credits}
-                  isActive={mapProgress.credits > 0.1}
+                  isActive={mapProgress.credits > 0.05}
                 />
               </div>
             )}
           </>
         )}
 
-        {/* Additional scroll space for credits */}
+        {/* Additional scroll space for credits - extended */}
         {scrollMode === "UNLOCKED" && currentPhase === "MAPS" && (
           <div
             style={{
               position: "absolute",
               top: `${window.innerHeight * 18}px`,
               width: "100%",
-              height: `${window.innerHeight * 2}px`, // Extra 2vh of scroll space
+              height: `${window.innerHeight * 2}px`, // Extra scroll space
               background: "#EEEEEE",
               zIndex: 5,
             }}
