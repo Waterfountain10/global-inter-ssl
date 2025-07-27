@@ -75,9 +75,10 @@ export default function HomePage() {
     }, 200);
   }, []);
 
-  // Listen for Map1 trigger
+  // Listen for Map1 trigger and return triggers
   useEffect(() => {
-    const checkMapTrigger = () => {
+    const checkTriggers = () => {
+      // Forward: Research → Maps
       if (
         sessionStorage.getItem("showMap1") === "true" &&
         currentPhase === "RESEARCH"
@@ -90,23 +91,56 @@ export default function HomePage() {
         document.documentElement.style.overflow = "";
         document.body.style.overflow = "";
       }
+
+      // Reverse: Maps → Research (triggered by ResearchQuestion scroll detection)
+      if (
+        sessionStorage.getItem("triggerReturn") === "true" &&
+        currentPhase === "MAPS"
+      ) {
+        console.log(
+          "🔄 Return triggered - starting smooth transition back to Research",
+        );
+        sessionStorage.removeItem("triggerReturn");
+
+        // Start the reverse sequence: Maps fade out → Research fade in
+        setTimeout(() => {
+          setCurrentPhase("RESEARCH");
+          sessionStorage.setItem("returnToResearch", "true");
+        }, 600); // Wait for Map content to fade out
+      }
     };
 
-    const interval = setInterval(checkMapTrigger, 100);
+    const interval = setInterval(checkTriggers, 100);
     return () => clearInterval(interval);
   }, [currentPhase]);
 
-  // Scroll handler for when unlocked
+  // Scroll handler for when unlocked - enhanced with reverse navigation
   useEffect(() => {
     if (scrollMode !== "UNLOCKED") return;
 
     const handleScroll = () => {
-      setScrollY(window.pageYOffset);
+      const newScrollY = window.pageYOffset;
+      setScrollY(newScrollY);
+
+      // Handle phase transitions based on scroll position
+      const windowHeight = window.innerHeight;
+
+      // If we're in MAPS phase and scroll back up significantly, return to RESEARCH
+      if (currentPhase === "MAPS" && newScrollY < windowHeight * 1.5) {
+        console.log("🔄 Scrolled back from Maps to Research");
+        setCurrentPhase("RESEARCH");
+        sessionStorage.setItem("returnToResearch", "true");
+      }
+      // If we're in RESEARCH phase and scroll down significantly, go to MAPS
+      else if (currentPhase === "RESEARCH" && newScrollY > windowHeight * 2.5) {
+        console.log("🚀 Scrolled forward from Research to Maps");
+        setCurrentPhase("MAPS");
+      }
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [scrollMode]);
+  }, [scrollMode, currentPhase]);
 
   return (
     <div className="globalinteriors-homepage">
@@ -188,7 +222,7 @@ export default function HomePage() {
         {/* Maps Section - additional content over ResearchQuestion */}
         {currentPhase === "MAPS" && (
           <>
-            {/* World Map Background */}
+            {/* World Map Background with smooth reverse fade */}
             <div
               style={{
                 position: "fixed",
@@ -197,8 +231,13 @@ export default function HomePage() {
                 width: "100%",
                 height: "100vh",
                 zIndex: 40,
-                opacity: 0.8,
+                opacity:
+                  sessionStorage.getItem("triggerReturn") === "true" ? 0 : 0.8,
                 pointerEvents: "none",
+                transition:
+                  sessionStorage.getItem("triggerReturn") === "true"
+                    ? "opacity 0.8s ease-out 0.3s"
+                    : "opacity 0.8s ease", // Delay for reverse
               }}
             >
               <img
@@ -212,7 +251,7 @@ export default function HomePage() {
               />
             </div>
 
-            {/* Map 1 Content - scroll responsive */}
+            {/* Map 1 Content - scroll responsive with smooth fade out on reverse */}
             <div
               style={{
                 position: "fixed",
@@ -225,7 +264,14 @@ export default function HomePage() {
                 alignItems: "center",
                 justifyContent: "center",
                 pointerEvents: "none",
-                opacity: Math.max(0, Math.min(1, scrollY / window.innerHeight)),
+                opacity:
+                  sessionStorage.getItem("triggerReturn") === "true"
+                    ? 0
+                    : Math.max(0, Math.min(1, scrollY / window.innerHeight)),
+                transition:
+                  sessionStorage.getItem("triggerReturn") === "true"
+                    ? "opacity 0.6s ease-out"
+                    : "opacity 0.3s ease",
               }}
             >
               <div

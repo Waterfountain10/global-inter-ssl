@@ -10,9 +10,10 @@ export default function ResearchQuestion() {
   const [showSearchBar, setShowSearchBar] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0); // 0 to 1
   const [isComplete, setIsComplete] = useState(false);
-  const [searchBarState, setSearchBarState] = useState("center"); // 'center', 'pinned', 'hidden'
+  const [searchBarState, setSearchBarState] = useState("center"); // 'center', 'pinned', 'hidden', 'returning'
+  const [isReturningFromMaps, setIsReturningFromMaps] = useState(false);
 
-  // Check for triggers from HomePage
+  // Check for triggers from HomePage and Maps phase returns
   useEffect(() => {
     const checkTriggers = () => {
       if (sessionStorage.getItem("phaseTransition") === "true" && !isVisible) {
@@ -20,6 +21,32 @@ export default function ResearchQuestion() {
         setIsVisible(true);
         setShowSearchBar(true);
         sessionStorage.removeItem("phaseTransition");
+      }
+
+      // Check if we're returning from Maps phase
+      if (sessionStorage.getItem("returnToResearch") === "true") {
+        console.log(
+          "🔄 Returning from Maps - starting smooth return animation",
+        );
+        setIsReturningFromMaps(true);
+
+        // Sequence: First show search bar in hidden state, then animate to pinned
+        setTimeout(() => {
+          setIsVisible(true);
+          setShowSearchBar(true);
+          setScrollProgress(1); // Full text
+          setIsComplete(true);
+          setSearchBarState("returning"); // Special state for return animation
+        }, 300); // Small delay for Maps fade out
+
+        // Then animate to pinned state
+        setTimeout(() => {
+          setSearchBarState("pinned");
+          setIsReturningFromMaps(false);
+          console.log("✅ Return animation complete - search bar pinned");
+        }, 1200); // Wait for return animation
+
+        sessionStorage.removeItem("returnToResearch");
       }
     };
 
@@ -31,6 +58,12 @@ export default function ResearchQuestion() {
   const triggerMap1 = () => {
     console.log("🗺️ Triggering Map1 reveal");
     setSearchBarState("hidden");
+
+    // Smoother hiding sequence
+    setTimeout(() => {
+      setShowSearchBar(false);
+    }, 400); // Wait for slide-up animation to start
+
     setTimeout(() => {
       sessionStorage.setItem("showMap1", "true");
       console.log("🗺️ Map1 trigger set");
@@ -53,30 +86,47 @@ export default function ResearchQuestion() {
       const map1TriggerScroll = windowHeight * 2.5;
 
       if (scrollY < startScroll) {
-        setScrollProgress(0);
-        if (isComplete) {
-          setIsComplete(false);
-          setSearchBarState("center");
-          console.log("🔄 Reset typing state - scrolled back up");
+        // Only reset if we haven't triggered Map1 yet
+        if (searchBarState !== "hidden") {
+          setScrollProgress(0);
+          if (isComplete) {
+            setIsComplete(false);
+            setSearchBarState("center");
+            console.log("🔄 Reset typing state - scrolled back up");
+          }
         }
       } else if (scrollY >= startScroll && scrollY <= endScroll) {
-        // Typing phase
-        const progress = (scrollY - startScroll) / (endScroll - startScroll);
-        setScrollProgress(Math.max(0, Math.min(1, progress)));
+        // Typing phase - only if we haven't triggered Map1
+        if (searchBarState !== "hidden") {
+          const progress = (scrollY - startScroll) / (endScroll - startScroll);
+          setScrollProgress(Math.max(0, Math.min(1, progress)));
 
-        if (progress >= 1 && !isComplete) {
-          setIsComplete(true);
-          setSearchBarState("pinned");
-          console.log("✅ Scroll typing complete - search bar pinned");
+          if (progress >= 1 && !isComplete) {
+            setIsComplete(true);
+            setSearchBarState("pinned");
+            console.log("✅ Scroll typing complete - search bar pinned");
+          }
         }
       } else if (
         scrollY > map1TriggerScroll &&
         isComplete &&
         searchBarState === "pinned"
       ) {
-        // Map1 trigger phase
+        // Map1 trigger phase - scroll works just like button click
         console.log("🚀 Map1 trigger scroll reached");
         triggerMap1();
+      }
+
+      // Handle reverse scroll from Map1 back to research
+      // If we're coming back from Map1, restore full text and pinned state
+      if (
+        scrollY < map1TriggerScroll &&
+        searchBarState === "hidden" &&
+        !isReturningFromMaps
+      ) {
+        console.log("🔄 Triggering return from Map1 via scroll");
+        // Trigger the smooth return sequence via HomePage
+        sessionStorage.setItem("triggerReturn", "true");
       }
     };
 
@@ -196,7 +246,7 @@ export default function ResearchQuestion() {
         )}
       </div>
 
-      {/* Persistent Search Bar - scroll controlled and mobile responsive */}
+      {/* Persistent Search Bar - scroll controlled, mobile responsive, and smooth return animation */}
       {showSearchBar && (
         <div
           style={{
@@ -218,15 +268,27 @@ export default function ResearchQuestion() {
                   : "80px"
                 : searchBarState === "hidden"
                   ? "-200px"
-                  : "50%",
+                  : searchBarState === "returning"
+                    ? "200px"
+                    : "50%",
             left: "50%",
             transform:
-              searchBarState === "pinned" || searchBarState === "hidden"
+              searchBarState === "pinned" ||
+              searchBarState === "hidden" ||
+              searchBarState === "returning"
                 ? "translateX(-50%)"
                 : "translate(-50%, -50%)",
-            transition: "all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+            transition:
+              searchBarState === "returning"
+                ? "all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+                : "all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
             zIndex: 10000,
-            opacity: searchBarState === "hidden" ? 0 : 1,
+            opacity:
+              searchBarState === "hidden"
+                ? 0
+                : searchBarState === "returning"
+                  ? 0.8
+                  : 1,
           }}
         >
           <span
@@ -249,7 +311,7 @@ export default function ResearchQuestion() {
             }}
           >
             {getTypedText()}
-            {scrollProgress > 0 && scrollProgress < 1 && (
+            {scrollProgress > 0 && scrollProgress < 1 && !isComplete && (
               <span
                 style={{
                   animation: "blink 1s step-end infinite",
