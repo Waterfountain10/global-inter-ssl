@@ -31,6 +31,17 @@
     }
 }
 
+@keyframes fadeInCenter {
+    from {
+        transform: translateY(30px) scale(0.95);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
 @keyframes fadeOutOverlay {
     0% {
         opacity: 1;
@@ -75,6 +86,9 @@
     left: 0;
     cursor: pointer;
     transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Ready state for smooth transitions */
@@ -110,6 +124,7 @@
     z-index: 0;
 }
 
+/* Corner logos */
 .scl-logo,
 .mit-logo {
     position: absolute;
@@ -133,35 +148,118 @@
     animation-delay: 0.4s;
 }
 
+/* Main content container - perfectly centered */
+.main-content-container {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+}
+
+/* Center logo container */
+.center-logo-container {
+    margin-bottom: 60px;
+    opacity: 0;
+    animation: fadeInCenter 1.2s ease-out forwards;
+    animation-delay: 0.8s;
+}
+
+/* Logo placeholder styling */
+.logo-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px dashed rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    padding: 40px 60px;
+    min-width: 300px;
+    min-height: 150px;
+    transition: all 0.3s ease;
+}
+
+.logo-placeholder:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.02);
+}
+
+.logo-placeholder-text {
+    color: white;
+    font-size: 2.5rem;
+    font-weight: 900;
+    letter-spacing: 3px;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.logo-placeholder-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.1rem;
+    font-weight: 400;
+    letter-spacing: 1px;
+}
+
+/* Alternative: Actual logo styling */
+.center-logo {
+    max-width: 400px;
+    max-height: 200px;
+    height: auto;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+/* Scroll indicators container positioned below logo */
+.scroll-indicators-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 400px;
+}
+
 /* Enhanced scroll indicator with Apple-style design */
 .scroll-indicator {
-    position: absolute;
-    bottom: 80px;
-    left: 50%;
-    transform: translateX(-50%);
+    position: relative;
     z-index: 2;
     opacity: 0;
     animation: slideInBottom 1s ease-out forwards;
-    animation-delay: 1s;
+    animation-delay: 1.2s;
     pointer-events: auto;
     cursor: pointer;
     text-align: center;
     transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
 }
 
 .scroll-indicator:hover {
-    transform: translateX(-50%) translateY(-5px);
+    transform: translateY(-5px);
 }
 
 .scroll-text {
     color: white;
     font-size: 0.9rem;
     font-weight: 500;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
     letter-spacing: 1px;
     text-transform: uppercase;
     opacity: 0.8;
     transition: opacity 0.3s ease;
+    text-align: center;
+    width: 100%;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .scroll-indicator:hover .scroll-text {
@@ -173,7 +271,10 @@
     height: 72px;
     transition: all 0.3s ease;
     animation: scrollHintPulse 3s ease-in-out infinite;
-    animation-delay: 2s;
+    animation-delay: 2.5s;
+    display: block;
+    margin: 0 auto;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
 .scroll-indicator:hover .scroll-icon {
@@ -181,16 +282,19 @@
     transform: scale(1.1);
 }
 
-/* Apple-style scroll hint container */
+/* Apple-style scroll hint container - positioned above scroll indicator */
 .scroll-hint-container {
-    position: absolute;
-    bottom: 160px;
-    left: 50%;
-    transform: translateX(-50%);
+    position: relative;
     z-index: 2;
     opacity: 0;
     animation: slideInBottom 1s ease-out forwards;
-    animation-delay: 1.5s;
+    animation-delay: 1.8s;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
 }
 
 .scroll-hint-line {
@@ -202,9 +306,9 @@
         rgba(255, 255, 255, 0.8),
         transparent
     );
-    margin: 0 auto 8px;
+    margin: 0 auto 8px auto;
     animation: scrollLineDraw 1.5s ease-out forwards;
-    animation-delay: 2s;
+    animation-delay: 2.2s;
 }
 
 .scroll-hint-dot {
@@ -214,7 +318,7 @@
     border-radius: 50%;
     margin: 0 auto;
     animation: scrollHintPulse 2s ease-in-out infinite;
-    animation-delay: 3s;
+    animation-delay: 3.5s;
 }
 
 /* Responsive design */
@@ -231,8 +335,41 @@
         height: 42px;
     }
 
+    .main-content-container {
+        max-width: 90%;
+        padding: 0 20px;
+    }
+
+    .center-logo-container {
+        margin-bottom: 40px;
+    }
+
+    .logo-placeholder {
+        padding: 30px 40px;
+        min-width: 250px;
+        min-height: 120px;
+    }
+
+    .logo-placeholder-text {
+        font-size: 2rem;
+        letter-spacing: 2px;
+    }
+
+    .logo-placeholder-subtitle {
+        font-size: 1rem;
+    }
+
+    .center-logo {
+        max-width: 300px;
+        max-height: 150px;
+    }
+
+    .scroll-indicators-container {
+        max-width: 300px;
+    }
+
     .scroll-indicator {
-        bottom: 60px;
+        width: 100%;
     }
 
     .scroll-icon {
@@ -242,10 +379,103 @@
 
     .scroll-text {
         font-size: 0.8rem;
+        margin-bottom: 12px;
+        letter-spacing: 0.5px;
     }
 
     .scroll-hint-container {
-        bottom: 140px;
+        margin-bottom: 16px;
+    }
+
+    .scroll-hint-line {
+        height: 30px;
+    }
+}
+
+/* Extra small mobile devices */
+@media (max-width: 480px) {
+    .main-content-container {
+        max-width: 95%;
+    }
+
+    .center-logo-container {
+        margin-bottom: 30px;
+    }
+
+    .logo-placeholder {
+        padding: 20px 30px;
+        min-width: 200px;
+        min-height: 100px;
+    }
+
+    .logo-placeholder-text {
+        font-size: 1.5rem;
+        letter-spacing: 1px;
+    }
+
+    .logo-placeholder-subtitle {
+        font-size: 0.9rem;
+    }
+
+    .center-logo {
+        max-width: 250px;
+        max-height: 120px;
+    }
+
+    .scroll-indicators-container {
+        max-width: 250px;
+    }
+
+    .scroll-icon {
+        width: 50px;
+        height: 50px;
+    }
+
+    .scroll-text {
+        font-size: 0.75rem;
+        margin-bottom: 10px;
+    }
+
+    .scroll-hint-container {
+        margin-bottom: 12px;
+    }
+
+    .scroll-hint-line {
+        height: 25px;
+    }
+
+    .scroll-hint-dot {
+        width: 5px;
+        height: 5px;
+    }
+}
+
+/* Landscape mobile orientation */
+@media (max-width: 768px) and (orientation: landscape) {
+    .main-content-container {
+        transform: scale(0.8);
+    }
+
+    .center-logo-container {
+        margin-bottom: 20px;
+    }
+
+    .scroll-hint-container {
+        margin-bottom: 10px;
+    }
+
+    .scroll-hint-line {
+        height: 20px;
+    }
+
+    .scroll-text {
+        font-size: 0.7rem;
+        margin-bottom: 8px;
+    }
+
+    .scroll-icon {
+        width: 45px;
+        height: 45px;
     }
 }
 
@@ -265,6 +495,17 @@
     .topfold-container.slide-up {
         transition: transform 0.5s ease;
     }
+
+    .scroll-indicator,
+    .scroll-hint-container,
+    .center-logo-container {
+        animation: none;
+        opacity: 1;
+    }
+
+    .logo-placeholder:hover {
+        transform: none;
+    }
 }
 
 /* High contrast mode support */
@@ -278,4 +519,42 @@
     .scroll-hint-dot {
         background: #ffffff;
     }
+
+    .scroll-icon {
+        filter: contrast(1.2) brightness(1.1);
+    }
+
+    .logo-placeholder {
+        border-color: rgba(255, 255, 255, 0.8);
+        background: rgba(255, 255, 255, 0.2);
+    }
+}
+
+/* Enhanced accessibility */
+@media (prefers-reduced-transparency) {
+    .scroll-text {
+        opacity: 1;
+    }
+
+    .scroll-hint-line,
+    .scroll-hint-dot {
+        opacity: 1;
+    }
+
+    .logo-placeholder {
+        background: rgba(255, 255, 255, 0.2);
+    }
+}
+
+/* Focus states for keyboard navigation */
+.scroll-indicator:focus,
+.scroll-hint-container:focus {
+    outline: 2px solid rgba(255, 57, 92, 0.8);
+    outline-offset: 4px;
+    border-radius: 8px;
+}
+
+.scroll-indicator:focus .scroll-icon,
+.scroll-hint-container:focus .scroll-hint-dot {
+    filter: brightness(1.3);
 }

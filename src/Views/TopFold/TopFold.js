@@ -67,9 +67,32 @@ const TopFold = ({ onScrollTrigger }) => {
     };
   }, [isReady]);
 
+  // Handle keyboard events for accessibility
+  useEffect(() => {
+    if (!isReady) return;
+
+    const handleKeyDown = (e) => {
+      // Trigger on Enter, Space, or Arrow Down
+      if (e.key === "Enter" || e.key === " " || e.key === "ArrowDown") {
+        e.preventDefault();
+        console.log("⌨️ Keyboard trigger detected:", e.key);
+        handleScrollTrigger();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isReady]);
+
   // Add click handler for testing
   const handleClick = () => {
     console.log("👆 TopFold clicked - triggering scroll");
+    handleScrollTrigger();
+  };
+
+  const handleScrollIndicatorClick = (e) => {
+    e.stopPropagation(); // Prevent event bubbling
+    console.log("🎯 Scroll indicator clicked");
     handleScrollTrigger();
   };
 
@@ -95,6 +118,7 @@ const TopFold = ({ onScrollTrigger }) => {
         />
       </video>
 
+      {/* Corner logos */}
       <img
         className="scl-logo"
         src="public/assets/images/scl_logo_white.png"
@@ -106,37 +130,59 @@ const TopFold = ({ onScrollTrigger }) => {
         alt="MIT"
       />
 
-      {/* Enhanced scroll indicator with Apple-style animation */}
-      <div
-        className="scroll-indicator"
-        onClick={(e) => {
-          e.stopPropagation(); // Prevent event bubbling
-          console.log("🎯 Arrow clicked");
-          handleScrollTrigger();
-        }}
-      >
-        <div className="scroll-text">Scroll to explore</div>
-        <img
-          className="scroll-icon"
-          src="public/assets/images/red_arrow.svg"
-          alt="Scroll Down"
-        />
-      </div>
+      {/* Main content container - centered vertically */}
+      <div className="main-content-container">
+        {/* Center logo placeholder */}
+        <div className="center-logo-container">
+          {/* Logo placeholder - replace with actual logo */}
+          <div className="logo-placeholder">
+            <div className="logo-placeholder-text">LOGO</div>
+            <div className="logo-placeholder-subtitle">Your Project Title</div>
+          </div>
 
-      {/* Apple-style scroll hint animation */}
-      {isReady && (
-        <div
-          className="scroll-hint-container"
-          onClick={(e) => {
-            e.stopPropagation();
-            console.log("💫 Scroll hint clicked");
-            handleScrollTrigger();
-          }}
-        >
-          <div className="scroll-hint-line"></div>
-          <div className="scroll-hint-dot"></div>
+          {/* Alternative: Use this for actual logo image */}
+          {/*
+          <img
+            className="center-logo"
+            src="public/assets/images/your_main_logo.png"
+            alt="Project Logo"
+          />
+          */}
         </div>
-      )}
+
+        {/* Scroll indicators positioned right below logo */}
+        {isReady && (
+          <div className="scroll-indicators-container">
+            {/* Apple-style scroll hint animation */}
+            <div
+              className="scroll-hint-container"
+              onClick={handleScrollIndicatorClick}
+              tabIndex="0"
+              role="button"
+              aria-label="Scroll down hint"
+            >
+              <div className="scroll-hint-line"></div>
+              <div className="scroll-hint-dot"></div>
+            </div>
+
+            {/* Enhanced scroll indicator with Apple-style animation */}
+            <div
+              className="scroll-indicator"
+              onClick={handleScrollIndicatorClick}
+              tabIndex="0"
+              role="button"
+              aria-label="Scroll to explore content"
+            >
+              <div className="scroll-text">Scroll to explore</div>
+              <img
+                className="scroll-icon"
+                src="public/assets/images/red_arrow.svg"
+                alt="Scroll Down"
+              />
+            </div>
+          </div>
+        )}
+      </div>
     </section>
   );
 };
