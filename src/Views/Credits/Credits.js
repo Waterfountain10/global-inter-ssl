@@ -1,4 +1,4 @@
-// src/Views/Credits/Credits.js - Scroll-driven version
+// src/Views/Credits/Credits.js - Enhanced scroll-driven version
 import React, { useEffect, useRef, useState } from "react";
 import "./Credits.css";
 
@@ -28,39 +28,62 @@ export default function Credits({
     }
   }, [isActive, hasEntered]);
 
-  // Calculate dynamic values based on scroll progress
+  // Calculate dynamic values based on scroll progress with enhanced slide-up effect
   const getContainerOpacity = () => {
-    // Fade in the entire credits section
-    if (scrollProgress < 0.1) return 0;
-    if (scrollProgress > 0.9) return 1;
-    return (scrollProgress - 0.1) / 0.8;
+    // Fade in the entire credits section more gradually
+    if (scrollProgress < 0.05) return 0;
+    if (scrollProgress > 0.3) return 1;
+    return (scrollProgress - 0.05) / 0.25;
   };
 
   const getContainerTransform = () => {
-    // Slide up effect like Apple product reveals
-    if (scrollProgress < 0.1) return "translateY(100vh)";
-    if (scrollProgress > 0.9) return "translateY(0)";
+    // Enhanced slide up effect - starts from completely off-screen
+    if (scrollProgress < 0.05) return "translateY(100vh)";
+    if (scrollProgress > 0.4) return "translateY(0)";
 
-    const slideProgress = (scrollProgress - 0.1) / 0.8;
-    const translateY = (1 - slideProgress) * 100;
+    // More dramatic slide-up animation
+    const slideProgress = (scrollProgress - 0.05) / 0.35;
+    const easeOut = 1 - Math.pow(1 - slideProgress, 3); // Cubic easing
+    const translateY = (1 - easeOut) * 100;
     return `translateY(${translateY}vh)`;
   };
 
   const getContentOpacity = () => {
-    // Content appears after container slide-up
-    if (scrollProgress < 0.3) return 0;
-    if (scrollProgress > 0.8) return 1;
-    return (scrollProgress - 0.3) / 0.5;
+    // Content appears after container slide-up with longer fade
+    if (scrollProgress < 0.2) return 0;
+    if (scrollProgress > 0.6) return 1;
+    return (scrollProgress - 0.2) / 0.4;
   };
 
   const getContentTransform = () => {
-    // Subtle scale and fade for content
-    if (scrollProgress < 0.3) return "scale(0.95)";
-    if (scrollProgress > 0.8) return "scale(1)";
+    // Enhanced scale and position animation for content
+    if (scrollProgress < 0.2) {
+      return "translate(-50%, -30%) scale(0.8)"; // Start higher and smaller
+    }
+    if (scrollProgress > 0.6) {
+      return "translate(-50%, -50%) scale(1)"; // End at perfect center
+    }
 
-    const contentProgress = (scrollProgress - 0.3) / 0.5;
-    const scale = 0.95 + contentProgress * 0.05;
-    return `scale(${scale})`;
+    const contentProgress = (scrollProgress - 0.2) / 0.4;
+    const easeOut = 1 - Math.pow(1 - contentProgress, 2); // Quadratic easing
+
+    // Interpolate between start and end positions
+    const startY = -30;
+    const endY = -50;
+    const currentY = startY + (endY - startY) * easeOut;
+
+    const startScale = 0.8;
+    const endScale = 1;
+    const currentScale = startScale + (endScale - startScale) * easeOut;
+
+    return `translate(-50%, ${currentY}%) scale(${currentScale})`;
+  };
+
+  // Calculate background overlay opacity for better visibility
+  const getOverlayOpacity = () => {
+    if (scrollProgress < 0.1) return 0;
+    if (scrollProgress > 0.5) return 1;
+    return (scrollProgress - 0.1) / 0.4;
   };
 
   return (
@@ -71,35 +94,43 @@ export default function Credits({
         position: "fixed",
         top: 0,
         left: 0,
-        background: "#EEEEEE",
         width: "100%",
         height: "100vh",
         zIndex: 50,
-        padding: "120px 0 80px",
         fontFamily: "'Montserrat', 'Helvetica Neue', sans-serif",
-        overflowY: "auto",
+        overflow: "hidden", // Prevent scrolling issues
         opacity: getContainerOpacity(),
         transform: getContainerTransform(),
         transition: isActive
           ? "none"
-          : "opacity 0.3s ease, transform 0.3s ease",
+          : "opacity 0.4s ease, transform 0.4s ease",
+        pointerEvents: scrollProgress > 0.3 ? "auto" : "none", // Enable interaction only when visible
       }}
     >
+      {/* Background overlay for better contrast */}
       <div
-        className="credits-content"
+        className="credits-overlay scroll-responsive"
         style={{
-          maxWidth: "1200px",
-          margin: "0 auto",
-          padding: "60px 48px",
-          position: "relative",
-          background: "#FFFFFF",
-          borderRadius: "20px",
-          boxShadow: "0 20px 40px rgba(0, 0, 0, 0.1)",
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          background: "#EEEEEE",
+          opacity: getOverlayOpacity(),
+          transition: isActive ? "none" : "opacity 0.3s ease",
+        }}
+      />
+
+      {/* Credits content bubble with enhanced visibility */}
+      <div
+        className="credits-content-bubble scroll-responsive"
+        style={{
           opacity: getContentOpacity(),
           transform: getContentTransform(),
           transition: isActive
             ? "none"
-            : "opacity 0.3s ease, transform 0.3s ease",
+            : "opacity 0.4s ease, transform 0.4s ease",
         }}
       >
         <div className="credits-grid">
