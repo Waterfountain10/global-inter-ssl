@@ -1,48 +1,162 @@
 /* src/Views/HomePage.css */
 .globalinteriors-homepage {
-  width: 100%;
-  height: auto; /* allow natural document flow */
-  overflow-x: hidden; /* prevent horizontal scroll only */
-  background: #EEEEEE !important; /* ensure parent container maintains off-white */
-  /* Enable smooth scrolling for the entire container */
-  scroll-behavior: smooth;
+    width: 100%;
+    height: auto;
+    overflow-x: hidden;
+    background: #eeeeee !important;
+    /* Enable smooth scrolling for the entire experience */
+    scroll-behavior: smooth;
 }
 
-/* Persistent world map background - elevated to HomePage level */
+/* Apple-style scroll progress bar */
+.scroll-progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.3);
+    z-index: 10000;
+    backdrop-filter: blur(10px);
+}
+
+.scroll-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff395c 0%, #ff6b8a 100%);
+    transform-origin: left;
+    transition: transform 0.1s ease-out;
+}
+
+/* Section containers - fixed positioning for scroll-driven animations */
+.section-container {
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.topfold-section {
+    position: relative;
+    z-index: 200;
+}
+
+.research-section {
+    z-index: 100;
+}
+
+.map-section {
+    z-index: 20;
+}
+
+.credits-section {
+    z-index: 50;
+}
+
+/* Persistent world map background - optimized for scroll performance */
 .persistent-world-map-background {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
-  overflow: hidden;
-  z-index: 15; /* above ResearchQuestion (z-index: 9999), below Map components (z-index: 19-20) */
-  pointer-events: none; /* allow clicks to pass through to map components */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    z-index: 15;
+    pointer-events: none;
+    will-change: opacity;
 }
 
 .persistent-world-map-background .world-map-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  animation: fadeInWorldMapPersistent 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1s forwards;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    will-change: transform;
 }
 
-@keyframes fadeInWorldMapPersistent {
-  from {
-    opacity: 0;
-    transform: scale(1.02);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+/* Smooth transitions for section visibility */
+.map-section {
+    transition: opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: opacity, transform;
+}
+
+/* Enhanced performance with CSS containment */
+.section-container {
+    contain: layout style paint;
+}
+
+/* Apple-style fade in animations */
+@keyframes fadeInSection {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Smooth entrance for map sections */
+.map-section.entering {
+    animation: fadeInSection 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* Credits slide-up animation like Apple product reveals */
+@keyframes slideUpReveal {
+    from {
+        transform: translateY(100vh);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.credits-section.revealing {
+    animation: slideUpReveal 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* Responsive scroll experience */
+@media (max-width: 768px) {
+    .scroll-progress-bar {
+        height: 2px;
+    }
+
+    .section-container {
+        height: 100vh;
+        height: 100dvh; /* Dynamic viewport height for mobile */
+    }
+}
+
+/* High-performance scrolling optimizations */
+* {
+    -webkit-overflow-scrolling: touch;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    .map-section {
+        transition: none;
+    }
+
+    .section-container {
+        animation: none;
+    }
 }
 
 /* Additional background reinforcement */
-html, body {
-  background: #EEEEEE !important;
+html,
+body {
+    background: #eeeeee !important;
+    margin: 0;
+    padding: 0;
 }

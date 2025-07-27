@@ -1,103 +1,281 @@
 @keyframes slideInLeft {
-  from { transform: translateX(-100px) scale(0.9); opacity: 0; }
-  to { transform: translateX(0) scale(1); opacity: 1; }
+    from {
+        transform: translateX(-100px) scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+    }
 }
 
 @keyframes slideInRight {
-  from { transform: translateX(100px) scale(0.9); opacity: 0; }
-  to { transform: translateX(0) scale(1); opacity: 1; }
+    from {
+        transform: translateX(100px) scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+    }
 }
 
 @keyframes slideInBottom {
-  from { transform: translateY(100px) scale(0.9); opacity: 0; }
-  to { transform: translateY(0) scale(1); opacity: 1; }
+    from {
+        transform: translateY(100px) scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
 }
 
 @keyframes fadeOutOverlay {
-  0% { opacity: 1; }
-  100% { opacity: 0; }
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
 }
 
-/* Standard document positioning for natural scroll */
+/* Apple-style scroll hint animations */
+@keyframes scrollHintPulse {
+    0%,
+    100% {
+        opacity: 0.6;
+        transform: translateY(0) scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: translateY(-5px) scale(1.1);
+    }
+}
+
+@keyframes scrollLineDraw {
+    from {
+        height: 0;
+        opacity: 0;
+    }
+    to {
+        height: 40px;
+        opacity: 0.8;
+    }
+}
+
+/* Container with enhanced scroll preparation */
 .topfold-container {
-  position: relative;
-  background: #EEEEEE;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-  top: 0;
-  left: 0;
+    position: relative;
+    background: #eeeeee;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    top: 0;
+    left: 0;
+    cursor: pointer;
+    transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
+/* Ready state for smooth transitions */
+.topfold-container.ready {
+    will-change: transform;
+}
+
+/* Smooth slide-up transition when scrolling begins */
 .topfold-container.slide-up {
-  transform: translateY(-100vh);
-  transition: transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transform: translateY(-100vh);
+    transition: transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .black-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: #000000;
-  z-index: 1; /* Above video, below logos */
-  opacity: 1;
-  animation: fadeOutOverlay 3s ease-out forwards;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000000;
+    z-index: 1;
+    opacity: 1;
+    animation: fadeOutOverlay 3s ease-out forwards;
 }
 
 .topfold-video {
-  position: absolute;
-  top: 0; 
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
 }
 
 .scl-logo,
 .mit-logo {
-  position: absolute;
-  z-index: 2;
-  opacity: 0;
+    position: absolute;
+    z-index: 2;
+    opacity: 0;
 }
 
 .scl-logo {
-  top: 48px;
-  left: 48px;
-  height: 32px;
-  animation: slideInLeft 1s ease-out forwards;
-  animation-delay: 0.4s;
+    top: 48px;
+    left: 48px;
+    height: 32px;
+    animation: slideInLeft 1s ease-out forwards;
+    animation-delay: 0.4s;
 }
 
 .mit-logo {
-  top: 41px;
-  right: 41px;
-  height: 48px;
-  animation: slideInRight 1s ease-out forwards;
-  animation-delay: 0.4s;
+    top: 41px;
+    right: 41px;
+    height: 48px;
+    animation: slideInRight 1s ease-out forwards;
+    animation-delay: 0.4s;
 }
 
+/* Enhanced scroll indicator with Apple-style design */
 .scroll-indicator {
-  position: absolute;
-  bottom: 72px;
-  left: 48.7%;
-  transform: translateX(-50%);
-  z-index: 2;
-  opacity: 0;
-  animation: slideInBottom 1s ease-out forwards;
-  animation-delay: 1s;
-  pointer-events: auto;
-  cursor: pointer;
+    position: absolute;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    opacity: 0;
+    animation: slideInBottom 1s ease-out forwards;
+    animation-delay: 1s;
+    pointer-events: auto;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.scroll-indicator:hover {
+    transform: translateX(-50%) translateY(-5px);
+}
+
+.scroll-text {
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.scroll-indicator:hover .scroll-text {
+    opacity: 1;
 }
 
 .scroll-icon {
-  width: 72px;
-  height: 72px;
-  transition: filter 0.3s ease;
+    width: 72px;
+    height: 72px;
+    transition: all 0.3s ease;
+    animation: scrollHintPulse 3s ease-in-out infinite;
+    animation-delay: 2s;
 }
 
-.scroll-icon:hover {
-  filter: brightness(50%);
+.scroll-indicator:hover .scroll-icon {
+    filter: brightness(1.2) drop-shadow(0 4px 8px rgba(255, 57, 92, 0.3));
+    transform: scale(1.1);
+}
+
+/* Apple-style scroll hint container */
+.scroll-hint-container {
+    position: absolute;
+    bottom: 160px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    opacity: 0;
+    animation: slideInBottom 1s ease-out forwards;
+    animation-delay: 1.5s;
+}
+
+.scroll-hint-line {
+    width: 2px;
+    height: 40px;
+    background: linear-gradient(
+        to bottom,
+        transparent,
+        rgba(255, 255, 255, 0.8),
+        transparent
+    );
+    margin: 0 auto 8px;
+    animation: scrollLineDraw 1.5s ease-out forwards;
+    animation-delay: 2s;
+}
+
+.scroll-hint-dot {
+    width: 6px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    margin: 0 auto;
+    animation: scrollHintPulse 2s ease-in-out infinite;
+    animation-delay: 3s;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .scl-logo {
+        top: 24px;
+        left: 24px;
+        height: 28px;
+    }
+
+    .mit-logo {
+        top: 21px;
+        right: 21px;
+        height: 42px;
+    }
+
+    .scroll-indicator {
+        bottom: 60px;
+    }
+
+    .scroll-icon {
+        width: 60px;
+        height: 60px;
+    }
+
+    .scroll-text {
+        font-size: 0.8rem;
+    }
+
+    .scroll-hint-container {
+        bottom: 140px;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .scroll-icon,
+    .scroll-hint-dot {
+        animation: none;
+    }
+
+    .scroll-hint-line {
+        animation: none;
+        height: 40px;
+        opacity: 0.8;
+    }
+
+    .topfold-container.slide-up {
+        transition: transform 0.5s ease;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .scroll-text {
+        color: #ffffff;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    }
+
+    .scroll-hint-line,
+    .scroll-hint-dot {
+        background: #ffffff;
+    }
 }
