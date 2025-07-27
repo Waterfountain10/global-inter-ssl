@@ -183,7 +183,7 @@ export default function HomePage() {
       <div
         style={{
           height:
-            scrollMode === "UNLOCKED" ? `${window.innerHeight * 3}px` : "100vh", // Increased height for typing space
+            scrollMode === "UNLOCKED" ? `${window.innerHeight * 9}px` : "100vh", // Extended height for all maps
           position: "relative",
           background: "#EEEEEE",
         }}
@@ -251,7 +251,36 @@ export default function HomePage() {
               />
             </div>
 
-            {/* Map 1 Content - scroll responsive with smooth fade out on reverse */}
+            {/* Map1 Overlay - appears above world map */}
+            <div
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100vh",
+                zIndex: 45,
+                opacity:
+                  scrollY >= window.innerHeight * 2.5 &&
+                  scrollY < window.innerHeight * 3.5
+                    ? 1
+                    : 0,
+                pointerEvents: "none",
+                transition: "opacity 0.5s ease",
+              }}
+            >
+              <img
+                src="/assets/images/map1_final.svg"
+                alt="Map1 overlay"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            </div>
+
+            {/* Map1 Content - scroll responsive with smooth fade out on reverse */}
             <div
               style={{
                 position: "fixed",
@@ -267,11 +296,14 @@ export default function HomePage() {
                 opacity:
                   sessionStorage.getItem("triggerReturn") === "true"
                     ? 0
-                    : Math.max(0, Math.min(1, scrollY / window.innerHeight)),
+                    : scrollY >= window.innerHeight * 2.5 &&
+                        scrollY < window.innerHeight * 3.5
+                      ? 1
+                      : 0,
                 transition:
                   sessionStorage.getItem("triggerReturn") === "true"
                     ? "opacity 0.6s ease-out"
-                    : "opacity 0.3s ease",
+                    : "opacity 0.5s ease",
               }}
             >
               <div
@@ -296,6 +328,392 @@ export default function HomePage() {
                     local cultural distinctiveness
                   </span>{" "}
                   has been the subject of considerable research.
+                </p>
+              </div>
+            </div>
+
+            {/* Map2 Overlay - appears above world map */}
+            <div
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100vh",
+                zIndex: 45,
+                opacity:
+                  scrollY >= window.innerHeight * 3.5 &&
+                  scrollY < window.innerHeight * 4.5
+                    ? 1
+                    : 0,
+                pointerEvents: "none",
+                transition: "opacity 0.5s ease",
+              }}
+            >
+              <img
+                src="/assets/images/map2_final.svg"
+                alt="Map2 overlay"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            </div>
+
+            {/* Map2 Content */}
+            <div
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100vh",
+                zIndex: 50,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                pointerEvents: "none",
+                opacity:
+                  scrollY >= window.innerHeight * 3.5 &&
+                  scrollY < window.innerHeight * 4.5
+                    ? 1
+                    : 0,
+                transition: "opacity 0.5s ease",
+              }}
+            >
+              <div
+                style={{
+                  background: "rgba(255,255,255,0.35)",
+                  backdropFilter: "blur(10px)",
+                  padding: "36px 48px",
+                  borderRadius: "40px",
+                  boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+                  maxWidth: "700px",
+                  textAlign: "center",
+                  fontSize: "1.6rem",
+                  fontWeight: "500",
+                  color: "#333",
+                  pointerEvents: "auto",
+                }}
+              >
+                <p>
+                  To answer this, we used a{" "}
+                  <span style={{ color: "#FF395C", fontWeight: "bold" }}>
+                    visual AI model
+                  </span>{" "}
+                  to analyze a unique dataset of over{" "}
+                  <span style={{ color: "#FF395C", fontWeight: "bold" }}>
+                    400k indoor images
+                  </span>
+                  .
+                </p>
+              </div>
+            </div>
+
+            {/* Map3 Overlay */}
+            <div
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100vh",
+                zIndex: 45,
+                opacity:
+                  scrollY >= window.innerHeight * 4.5 &&
+                  scrollY < window.innerHeight * 5.5
+                    ? 1
+                    : 0,
+                pointerEvents: "none",
+                transition: "opacity 0.5s ease",
+              }}
+            >
+              <img
+                src="/assets/images/map3_final.svg"
+                alt="Map3 overlay"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            </div>
+
+            {/* Map3 Content */}
+            <div
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100vh",
+                zIndex: 50,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                pointerEvents: "none",
+                opacity:
+                  scrollY >= window.innerHeight * 4.5 &&
+                  scrollY < window.innerHeight * 5.5
+                    ? 1
+                    : 0,
+                transition: "opacity 0.5s ease",
+              }}
+            >
+              <div
+                style={{
+                  background: "rgba(255,255,255,0.35)",
+                  backdropFilter: "blur(10px)",
+                  padding: "36px 48px",
+                  borderRadius: "40px",
+                  boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+                  maxWidth: "700px",
+                  textAlign: "center",
+                  fontSize: "1.6rem",
+                  fontWeight: "500",
+                  color: "#333",
+                  pointerEvents: "auto",
+                }}
+              >
+                <p>
+                  To study the{" "}
+                  <span style={{ color: "#FF395C", fontWeight: "bold" }}>
+                    patterns of similarity
+                  </span>{" "}
+                  between kitchens, living rooms, bedrooms, and bathrooms across{" "}
+                  <span style={{ color: "#FF395C", fontWeight: "bold" }}>
+                    80 global cities
+                  </span>
+                  .
+                </p>
+              </div>
+            </div>
+
+            {/* Map4 Overlay */}
+            <div
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100vh",
+                zIndex: 45,
+                opacity:
+                  scrollY >= window.innerHeight * 5.5 &&
+                  scrollY < window.innerHeight * 6.5
+                    ? 1
+                    : 0,
+                pointerEvents: "none",
+                transition: "opacity 0.5s ease",
+              }}
+            >
+              <img
+                src="/assets/images/map4_final.svg"
+                alt="Map4 overlay"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            </div>
+
+            {/* Map4 Content */}
+            <div
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100vh",
+                zIndex: 50,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                pointerEvents: "none",
+                opacity:
+                  scrollY >= window.innerHeight * 5.5 &&
+                  scrollY < window.innerHeight * 6.5
+                    ? 1
+                    : 0,
+                transition: "opacity 0.5s ease",
+              }}
+            >
+              <div
+                style={{
+                  background: "rgba(255,255,255,0.35)",
+                  backdropFilter: "blur(10px)",
+                  padding: "36px 48px",
+                  borderRadius: "40px",
+                  boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+                  maxWidth: "700px",
+                  textAlign: "center",
+                  fontSize: "1.6rem",
+                  fontWeight: "500",
+                  color: "#333",
+                  pointerEvents: "auto",
+                }}
+              >
+                <p>
+                  Using deep learning, we demonstrate that{" "}
+                  <span style={{ color: "#FF395C", fontWeight: "bold" }}>
+                    geographic proximity
+                  </span>{" "}
+                  and{" "}
+                  <span style={{ color: "#FF395C", fontWeight: "bold" }}>
+                    degree of globalization
+                  </span>{" "}
+                  significantly correlate with the visual characteristics of
+                  indoor spaces.
+                </p>
+              </div>
+            </div>
+
+            {/* Map5 Overlay */}
+            <div
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100vh",
+                zIndex: 45,
+                opacity:
+                  scrollY >= window.innerHeight * 6.5 &&
+                  scrollY < window.innerHeight * 7.5
+                    ? 1
+                    : 0,
+                pointerEvents: "none",
+                transition: "opacity 0.5s ease",
+              }}
+            >
+              <img
+                src="/assets/images/map5_final.svg"
+                alt="Map5 overlay"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            </div>
+
+            {/* Map5 Content */}
+            <div
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100vh",
+                zIndex: 50,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                pointerEvents: "none",
+                opacity:
+                  scrollY >= window.innerHeight * 6.5 &&
+                  scrollY < window.innerHeight * 7.5
+                    ? 1
+                    : 0,
+                transition: "opacity 0.5s ease",
+              }}
+            >
+              <div
+                style={{
+                  background: "rgba(255,255,255,0.35)",
+                  backdropFilter: "blur(10px)",
+                  padding: "36px 48px",
+                  borderRadius: "40px",
+                  boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+                  maxWidth: "700px",
+                  textAlign: "center",
+                  fontSize: "1.6rem",
+                  fontWeight: "500",
+                  color: "#333",
+                  pointerEvents: "auto",
+                }}
+              >
+                <p>
+                  Revealing that certain{" "}
+                  <span style={{ color: "#FF395C", fontWeight: "bold" }}>
+                    objects
+                  </span>{" "}
+                  — either through their presence or unique appearance — serve
+                  as{" "}
+                  <span style={{ color: "#FF395C", fontWeight: "bold" }}>
+                    markers of visual identity
+                  </span>
+                  .
+                </p>
+              </div>
+            </div>
+
+            {/* Map6 Overlay */}
+            <div
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100vh",
+                zIndex: 45,
+                opacity: scrollY >= window.innerHeight * 7.5 ? 1 : 0,
+                pointerEvents: "none",
+                transition: "opacity 0.5s ease",
+              }}
+            >
+              <img
+                src="/assets/images/map6_final.svg"
+                alt="Map6 overlay"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            </div>
+
+            {/* Map6 Content */}
+            <div
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100vh",
+                zIndex: 50,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                pointerEvents: "none",
+                opacity: scrollY >= window.innerHeight * 7.5 ? 1 : 0,
+                transition: "opacity 0.5s ease",
+              }}
+            >
+              <div
+                style={{
+                  background: "rgba(255,255,255,0.35)",
+                  backdropFilter: "blur(10px)",
+                  padding: "36px 48px",
+                  borderRadius: "40px",
+                  boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+                  maxWidth: "700px",
+                  textAlign: "center",
+                  fontSize: "1.6rem",
+                  fontWeight: "500",
+                  color: "#333",
+                  pointerEvents: "auto",
+                }}
+              >
+                <p>
+                  Our findings show that despite global pressures and trends
+                  towards cultural homogenization,{" "}
+                  <span style={{ color: "#FF395C", fontWeight: "bold" }}>
+                    local cultural identities nevertheless remain
+                  </span>
+                  .
                 </p>
               </div>
             </div>
