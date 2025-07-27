@@ -4,6 +4,7 @@ import "./TopFold.css";
 const TopFold = ({ onScrollTrigger }) => {
   const videoRef = useRef(null);
   const [isReady, setIsReady] = useState(false);
+  const [logoError, setLogoError] = useState(false);
 
   useEffect(() => {
     // Ensure we start at the top and don't interfere with HomePage scroll management
@@ -96,6 +97,19 @@ const TopFold = ({ onScrollTrigger }) => {
     handleScrollTrigger();
   };
 
+  // Handle logo loading error
+  const handleLogoError = (e) => {
+    console.error("Logo failed to load:", e.target.src);
+    console.log("🔄 Switching to fallback placeholder");
+    setLogoError(true);
+  };
+
+  // Handle successful logo load
+  const handleLogoLoad = () => {
+    console.log("✅ Logo loaded successfully");
+    setLogoError(false);
+  };
+
   return (
     <section
       className={`topfold-container${isReady ? " ready" : ""}`}
@@ -132,22 +146,23 @@ const TopFold = ({ onScrollTrigger }) => {
 
       {/* Main content container - centered vertically */}
       <div className="main-content-container">
-        {/* Center logo placeholder */}
+        {/* Center logo container with actual logo */}
         <div className="center-logo-container">
-          {/* Logo placeholder - replace with actual logo */}
-          <div className="logo-placeholder">
-            <div className="logo-placeholder-text">LOGO</div>
-            <div className="logo-placeholder-subtitle">Your Project Title</div>
-          </div>
-
-          {/* Alternative: Use this for actual logo image */}
-          {/*
-          <img
-            className="center-logo"
-            src="public/assets/images/your_main_logo.png"
-            alt="Project Logo"
-          />
-          */}
+          {!logoError ? (
+            <img
+              className="center-logo"
+              src="globalinteriors_logo.png"
+              alt="Global Interiors"
+              onError={handleLogoError}
+              onLoad={handleLogoLoad}
+            />
+          ) : (
+            /* Fallback placeholder */
+            <div className="logo-placeholder">
+              <div className="logo-placeholder-text">GLOBAL</div>
+              <div className="logo-placeholder-subtitle">INTERIORS</div>
+            </div>
+          )}
         </div>
 
         {/* Scroll indicators positioned right below logo */}
@@ -176,7 +191,7 @@ const TopFold = ({ onScrollTrigger }) => {
               <div className="scroll-text">Scroll to explore</div>
               <img
                 className="scroll-icon"
-                src="public/assets/images/red_arrow.svg"
+                src="assets/images/red_arrow.svg"
                 alt="Scroll Down"
               />
             </div>

@@ -167,9 +167,26 @@
     opacity: 0;
     animation: fadeInCenter 1.2s ease-out forwards;
     animation-delay: 0.8s;
+    position: relative;
 }
 
-/* Logo placeholder styling */
+/* Actual logo styling - enhanced for better display */
+.center-logo {
+    max-width: 500px;
+    max-height: 250px;
+    width: auto;
+    height: auto;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+    transition: all 0.3s ease;
+    display: block;
+}
+
+.center-logo:hover {
+    filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.5));
+    transform: scale(1.02);
+}
+
+/* Logo placeholder styling - now used as fallback */
 .logo-placeholder {
     display: flex;
     flex-direction: column;
@@ -206,14 +223,6 @@
     font-size: 1.1rem;
     font-weight: 400;
     letter-spacing: 1px;
-}
-
-/* Alternative: Actual logo styling */
-.center-logo {
-    max-width: 400px;
-    max-height: 200px;
-    height: auto;
-    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
 }
 
 /* Scroll indicators container positioned below logo */
@@ -344,6 +353,11 @@
         margin-bottom: 40px;
     }
 
+    .center-logo {
+        max-width: 350px;
+        max-height: 180px;
+    }
+
     .logo-placeholder {
         padding: 30px 40px;
         min-width: 250px;
@@ -357,11 +371,6 @@
 
     .logo-placeholder-subtitle {
         font-size: 1rem;
-    }
-
-    .center-logo {
-        max-width: 300px;
-        max-height: 150px;
     }
 
     .scroll-indicators-container {
@@ -402,6 +411,11 @@
         margin-bottom: 30px;
     }
 
+    .center-logo {
+        max-width: 280px;
+        max-height: 140px;
+    }
+
     .logo-placeholder {
         padding: 20px 30px;
         min-width: 200px;
@@ -415,11 +429,6 @@
 
     .logo-placeholder-subtitle {
         font-size: 0.9rem;
-    }
-
-    .center-logo {
-        max-width: 250px;
-        max-height: 120px;
     }
 
     .scroll-indicators-container {
@@ -458,6 +467,11 @@
 
     .center-logo-container {
         margin-bottom: 20px;
+    }
+
+    .center-logo {
+        max-width: 300px;
+        max-height: 150px;
     }
 
     .scroll-hint-container {
@@ -503,7 +517,8 @@
         opacity: 1;
     }
 
-    .logo-placeholder:hover {
+    .logo-placeholder:hover,
+    .center-logo:hover {
         transform: none;
     }
 }
@@ -527,6 +542,10 @@
     .logo-placeholder {
         border-color: rgba(255, 255, 255, 0.8);
         background: rgba(255, 255, 255, 0.2);
+    }
+
+    .center-logo {
+        filter: contrast(1.1) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.6));
     }
 }
 
@@ -557,4 +576,14 @@
 .scroll-indicator:focus .scroll-icon,
 .scroll-hint-container:focus .scroll-hint-dot {
     filter: brightness(1.3);
+}
+
+/* Logo loading states */
+.center-logo {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.center-logo[style*="display: none"] + .logo-placeholder {
+    display: flex !important;
 }
