@@ -144,60 +144,58 @@ const TopFold = ({ onScrollTrigger }) => {
         alt="MIT"
       />
 
-      {/* Main content container - centered vertically */}
-      <div className="main-content-container">
-        {/* Center logo container with actual logo */}
-        <div className="center-logo-container">
-          {!logoError ? (
-            <img
-              className="center-logo"
-              src="globalinteriors_logo.png"
-              alt="Global Interiors"
-              onError={handleLogoError}
-              onLoad={handleLogoLoad}
-            />
-          ) : (
-            /* Fallback placeholder */
-            <div className="logo-placeholder">
-              <div className="logo-placeholder-text">GLOBAL</div>
-              <div className="logo-placeholder-subtitle">INTERIORS</div>
-            </div>
-          )}
+      {/* Full-screen logo */}
+      {!logoError ? (
+        <img
+          className="fullscreen-logo"
+          src="globalinteriors_logo.png"
+          alt="Global Interiors"
+          onError={handleLogoError}
+          onLoad={handleLogoLoad}
+        />
+      ) : (
+        /* Fallback placeholder for full screen */
+        <div className="fullscreen-logo-placeholder">
+          <div className="logo-placeholder-text">GLOBAL</div>
+          <div className="logo-placeholder-subtitle">INTERIORS</div>
         </div>
+      )}
 
-        {/* Scroll indicators positioned right below logo */}
-        {isReady && (
-          <div className="scroll-indicators-container">
-            {/* Apple-style scroll hint animation */}
-            <div
-              className="scroll-hint-container"
-              onClick={handleScrollIndicatorClick}
-              tabIndex="0"
-              role="button"
-              aria-label="Scroll down hint"
-            >
-              <div className="scroll-hint-line"></div>
-              <div className="scroll-hint-dot"></div>
-            </div>
+      {/* Invisible spacer block to maintain layout structure */}
+      <div className="layout-spacer"></div>
 
-            {/* Enhanced scroll indicator with Apple-style animation */}
-            <div
-              className="scroll-indicator"
-              onClick={handleScrollIndicatorClick}
-              tabIndex="0"
-              role="button"
-              aria-label="Scroll to explore content"
-            >
-              <div className="scroll-text">Scroll to explore</div>
-              <img
-                className="scroll-icon"
-                src="assets/images/red_arrow.svg"
-                alt="Scroll Down"
-              />
-            </div>
+      {/* Scroll indicators positioned at bottom center */}
+      {isReady && (
+        <div className="scroll-indicators-container">
+          {/* Apple-style scroll hint animation */}
+          <div
+            className="scroll-hint-container"
+            onClick={handleScrollIndicatorClick}
+            tabIndex="0"
+            role="button"
+            aria-label="Scroll down hint"
+          >
+            <div className="scroll-hint-line"></div>
+            <div className="scroll-hint-dot"></div>
           </div>
-        )}
-      </div>
+
+          {/* Enhanced scroll indicator with Apple-style animation */}
+          <div
+            className="scroll-indicator"
+            onClick={handleScrollIndicatorClick}
+            tabIndex="0"
+            role="button"
+            aria-label="Scroll to explore content"
+          >
+            <div className="scroll-text">Scroll to explore</div>
+            <img
+              className="scroll-icon"
+              src="assets/images/red_arrow.svg"
+              alt="Scroll Down"
+            />
+          </div>
+        </div>
+      )}
     </section>
   );
 };

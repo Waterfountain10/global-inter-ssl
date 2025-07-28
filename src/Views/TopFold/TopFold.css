@@ -87,8 +87,10 @@
     cursor: pointer;
     transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    padding: 60px 0;
 }
 
 /* Ready state for smooth transitions */
@@ -148,46 +150,33 @@
     animation-delay: 0.4s;
 }
 
-/* Main content container - perfectly centered */
-.main-content-container {
-    position: relative;
-    z-index: 3;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    max-width: 600px;
-    text-align: center;
-}
-
-/* Center logo container */
-.center-logo-container {
-    margin-bottom: 60px;
+/* Full-screen logo styling */
+.fullscreen-logo {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    object-position: center;
+    z-index: 2;
     opacity: 0;
     animation: fadeInCenter 1.2s ease-out forwards;
     animation-delay: 0.8s;
-    position: relative;
-}
-
-/* Actual logo styling - enhanced for better display */
-.center-logo {
-    max-width: 500px;
-    max-height: 250px;
-    width: auto;
-    height: auto;
-    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.1));
     transition: all 0.3s ease;
-    display: block;
 }
 
-.center-logo:hover {
-    filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.5));
-    transform: scale(1.02);
+.fullscreen-logo:hover {
+    filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.15));
 }
 
-/* Logo placeholder styling - now used as fallback */
-.logo-placeholder {
+/* Full-screen logo placeholder styling */
+.fullscreen-logo-placeholder {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -197,16 +186,26 @@
     -webkit-backdrop-filter: blur(10px);
     border: 2px dashed rgba(255, 255, 255, 0.3);
     border-radius: 20px;
-    padding: 40px 60px;
-    min-width: 300px;
-    min-height: 150px;
+    padding: 60px 80px;
+    min-width: 400px;
+    min-height: 200px;
     transition: all 0.3s ease;
+    z-index: 2;
+    opacity: 0;
+    animation: fadeInCenter 1.2s ease-out forwards;
+    animation-delay: 0.8s;
 }
 
-.logo-placeholder:hover {
+.fullscreen-logo-placeholder:hover {
     background: rgba(255, 255, 255, 0.15);
     border-color: rgba(255, 255, 255, 0.5);
-    transform: scale(1.02);
+    transform: translate(-50%, -50%) scale(1.02);
+}
+
+/* Layout spacer to maintain structure */
+.layout-spacer {
+    flex: 1;
+    min-height: 200px;
 }
 
 .logo-placeholder-text {
@@ -225,7 +224,7 @@
     letter-spacing: 1px;
 }
 
-/* Scroll indicators container positioned below logo */
+/* Scroll indicators container positioned at bottom */
 .scroll-indicators-container {
     display: flex;
     flex-direction: column;
@@ -233,6 +232,8 @@
     justify-content: center;
     width: 100%;
     max-width: 400px;
+    z-index: 10;
+    position: relative;
 }
 
 /* Enhanced scroll indicator with Apple-style design */
@@ -275,9 +276,10 @@
     opacity: 1;
 }
 
+/* Scroll icon - made smaller */
 .scroll-icon {
-    width: 72px;
-    height: 72px;
+    width: 56px;
+    height: 56px;
     transition: all 0.3s ease;
     animation: scrollHintPulse 3s ease-in-out infinite;
     animation-delay: 2.5s;
@@ -344,33 +346,18 @@
         height: 42px;
     }
 
-    .main-content-container {
-        max-width: 90%;
-        padding: 0 20px;
+    .topfold-container {
+        padding: 40px 0;
     }
 
-    .center-logo-container {
-        margin-bottom: 40px;
+    .fullscreen-logo-placeholder {
+        padding: 40px 50px;
+        min-width: 300px;
+        min-height: 150px;
     }
 
-    .center-logo {
-        max-width: 350px;
-        max-height: 180px;
-    }
-
-    .logo-placeholder {
-        padding: 30px 40px;
-        min-width: 250px;
-        min-height: 120px;
-    }
-
-    .logo-placeholder-text {
-        font-size: 2rem;
-        letter-spacing: 2px;
-    }
-
-    .logo-placeholder-subtitle {
-        font-size: 1rem;
+    .layout-spacer {
+        min-height: 150px;
     }
 
     .scroll-indicators-container {
@@ -382,8 +369,8 @@
     }
 
     .scroll-icon {
-        width: 60px;
-        height: 60px;
+        width: 48px;
+        height: 48px;
     }
 
     .scroll-text {
@@ -403,32 +390,18 @@
 
 /* Extra small mobile devices */
 @media (max-width: 480px) {
-    .main-content-container {
-        max-width: 95%;
+    .topfold-container {
+        padding: 30px 0;
     }
 
-    .center-logo-container {
-        margin-bottom: 30px;
+    .fullscreen-logo-placeholder {
+        padding: 30px 40px;
+        min-width: 250px;
+        min-height: 120px;
     }
 
-    .center-logo {
-        max-width: 280px;
-        max-height: 140px;
-    }
-
-    .logo-placeholder {
-        padding: 20px 30px;
-        min-width: 200px;
-        min-height: 100px;
-    }
-
-    .logo-placeholder-text {
-        font-size: 1.5rem;
-        letter-spacing: 1px;
-    }
-
-    .logo-placeholder-subtitle {
-        font-size: 0.9rem;
+    .layout-spacer {
+        min-height: 120px;
     }
 
     .scroll-indicators-container {
@@ -436,8 +409,8 @@
     }
 
     .scroll-icon {
-        width: 50px;
-        height: 50px;
+        width: 40px;
+        height: 40px;
     }
 
     .scroll-text {
@@ -461,17 +434,12 @@
 
 /* Landscape mobile orientation */
 @media (max-width: 768px) and (orientation: landscape) {
-    .main-content-container {
-        transform: scale(0.8);
+    .topfold-container {
+        padding: 20px 0;
     }
 
-    .center-logo-container {
-        margin-bottom: 20px;
-    }
-
-    .center-logo {
-        max-width: 300px;
-        max-height: 150px;
+    .layout-spacer {
+        min-height: 80px;
     }
 
     .scroll-hint-container {
@@ -488,8 +456,8 @@
     }
 
     .scroll-icon {
-        width: 45px;
-        height: 45px;
+        width: 36px;
+        height: 36px;
     }
 }
 
