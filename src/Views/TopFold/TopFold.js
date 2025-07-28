@@ -127,7 +127,7 @@ const TopFold = ({ onScrollTrigger }) => {
         preload="auto"
       >
         <source
-          src="assets/videos/globalinteriors_video.mov"
+          src="assets/videos/globalinteriors_video.mp4"
           type="video/mp4"
         />
       </video>

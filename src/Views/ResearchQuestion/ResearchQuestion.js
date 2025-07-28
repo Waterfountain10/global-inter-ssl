@@ -114,37 +114,109 @@ export default function ResearchQuestion() {
     return fullText.slice(0, charCount);
   };
 
-  // Handle button click
+  // Calculate if text needs multiple lines - moved to component level
+  const getTextDimensions = () => {
+    const currentText = getTypedText();
+    const fontSize =
+      window.innerWidth <= 480 ? 16 : window.innerWidth <= 768 ? 18 : 24;
+    const charWidth = fontSize * 0.6;
+    const textWidthPx = currentText.length * charWidth;
+
+    // Mobile-optimized spacing
+    const buttonWidth =
+      window.innerWidth <= 480 ? 36 : window.innerWidth <= 768 ? 40 : 50;
+    const horizontalPadding =
+      window.innerWidth <= 480 ? 24 : window.innerWidth <= 768 ? 32 : 48;
+    const spacing =
+      window.innerWidth <= 480 ? 12 : window.innerWidth <= 768 ? 16 : 20;
+
+    // Responsive max width
+    let maxWidth;
+    if (window.innerWidth <= 480) {
+      maxWidth = window.innerWidth * 0.95;
+    } else if (window.innerWidth <= 768) {
+      maxWidth = window.innerWidth * 0.9;
+    } else {
+      maxWidth = 800;
+    }
+
+    const maxSingleLineWidth =
+      maxWidth - buttonWidth - horizontalPadding - spacing;
+
+    // Determine if we need multiple lines
+    const needsMultiLine = textWidthPx > maxSingleLineWidth;
+    const lines = needsMultiLine
+      ? Math.ceil(textWidthPx / maxSingleLineWidth)
+      : 1;
+
+    return { needsMultiLine, lines, textWidthPx, maxSingleLineWidth, maxWidth };
+  };
+
+  // Add window resize listener for real-time responsiveness
+  useEffect(() => {
+    const handleResize = () => {
+      // Force re-render on window resize for responsive calculations
+      // This ensures the search bar resizes properly when switching between mobile/desktop
+      setScrollProgress((prev) => prev); // Trigger re-render
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Get current text dimensions
+  const { needsMultiLine, lines, maxWidth } = getTextDimensions();
   const handleButtonClick = () => {
     if (isComplete) {
+      // If typing is complete, trigger Map1 reveal
       triggerMap1();
+    } else {
+      // If typing is in progress, scroll down to advance the typing
+      const windowHeight = window.innerHeight;
+      const currentScroll = window.pageYOffset;
+      const targetScroll = currentScroll + windowHeight * 0.3; // Scroll down 30% of viewport
+
+      window.scrollTo({
+        top: targetScroll,
+        behavior: "smooth",
+      });
+
+      console.log("🔽 Button clicked - scrolling down to advance typing");
     }
   };
 
-  // Enhanced responsive search bar with multi-line support
+  // Enhanced responsive search bar with mobile-optimized multi-line support
   const getSearchBarStyle = () => {
     const currentText = getTypedText();
 
-    // Calculate if text needs multiple lines
+    // Mobile-first responsive calculations
     const getTextDimensions = () => {
+      // Responsive font sizes
       const fontSize =
-        window.innerWidth <= 480
-          ? 14.4
-          : window.innerWidth <= 768
-            ? 17.6
-            : 22.4;
-      const charWidth = fontSize * 0.55;
+        window.innerWidth <= 480 ? 16 : window.innerWidth <= 768 ? 18 : 24;
+      const charWidth = fontSize * 0.6; // More accurate character width
       const textWidthPx = currentText.length * charWidth;
 
-      // Maximum single-line width (leaving space for button and padding)
-      const buttonWidth = window.innerWidth <= 768 ? 40 : 50;
-      const horizontalPadding = window.innerWidth <= 768 ? 32 : 48;
-      const spacing = 20;
+      // Mobile-optimized spacing
+      const buttonWidth =
+        window.innerWidth <= 480 ? 36 : window.innerWidth <= 768 ? 40 : 50;
+      const horizontalPadding =
+        window.innerWidth <= 480 ? 24 : window.innerWidth <= 768 ? 32 : 48;
+      const spacing =
+        window.innerWidth <= 480 ? 12 : window.innerWidth <= 768 ? 16 : 20;
+
+      // Responsive max width - much smaller for mobile
+      let maxWidth;
+      if (window.innerWidth <= 480) {
+        maxWidth = window.innerWidth * 0.95; // 95% on mobile
+      } else if (window.innerWidth <= 768) {
+        maxWidth = window.innerWidth * 0.9; // 90% on tablet
+      } else {
+        maxWidth = 800; // Fixed max on desktop
+      }
+
       const maxSingleLineWidth =
-        Math.min(window.innerWidth * 0.9, 800) -
-        buttonWidth -
-        horizontalPadding -
-        spacing;
+        maxWidth - buttonWidth - horizontalPadding - spacing;
 
       // Determine if we need multiple lines
       const needsMultiLine = textWidthPx > maxSingleLineWidth;
@@ -152,47 +224,60 @@ export default function ResearchQuestion() {
         ? Math.ceil(textWidthPx / maxSingleLineWidth)
         : 1;
 
-      return { needsMultiLine, lines, textWidthPx, maxSingleLineWidth };
+      return {
+        needsMultiLine,
+        lines,
+        textWidthPx,
+        maxSingleLineWidth,
+        maxWidth,
+      };
     };
 
-    const { needsMultiLine, lines } = getTextDimensions();
+    const { needsMultiLine, lines, maxWidth } = getTextDimensions();
 
-    // Calculate dynamic width - fixed when multi-line
+    // Calculate dynamic width - mobile optimized
     const getResponsiveWidth = () => {
       if (needsMultiLine) {
-        // Use maximum width when multi-line
-        return Math.min(window.innerWidth * 0.9, 800);
+        return maxWidth; // Use calculated max width
       }
 
-      // Original single-line logic
+      // Single-line responsive width
       const fontSize =
-        window.innerWidth <= 480
-          ? 14.4
-          : window.innerWidth <= 768
-            ? 17.6
-            : 22.4;
-      const charWidth = fontSize * 0.55;
+        window.innerWidth <= 480 ? 16 : window.innerWidth <= 768 ? 18 : 24;
+      const charWidth = fontSize * 0.6;
       const textWidthPx = currentText.length * charWidth;
-      const buttonWidth = window.innerWidth <= 768 ? 40 : 50;
-      const horizontalPadding = window.innerWidth <= 768 ? 32 : 48;
-      const spacing = 20;
-      const minWidth =
-        window.innerWidth <= 480 ? 320 : window.innerWidth <= 768 ? 400 : 480;
-      const maxWidth = Math.min(window.innerWidth * 0.9, 800);
+      const buttonWidth =
+        window.innerWidth <= 480 ? 36 : window.innerWidth <= 768 ? 40 : 50;
+      const horizontalPadding =
+        window.innerWidth <= 480 ? 24 : window.innerWidth <= 768 ? 32 : 48;
+      const spacing =
+        window.innerWidth <= 480 ? 12 : window.innerWidth <= 768 ? 16 : 20;
+
+      // Mobile-friendly minimum widths
+      let minWidth;
+      if (window.innerWidth <= 480) {
+        minWidth = 280; // Smaller minimum for mobile
+      } else if (window.innerWidth <= 768) {
+        minWidth = 350; // Medium minimum for tablet
+      } else {
+        minWidth = 480; // Desktop minimum
+      }
+
       const neededWidth =
         textWidthPx + buttonWidth + horizontalPadding + spacing;
 
       return Math.max(minWidth, Math.min(maxWidth, neededWidth));
     };
 
-    // Calculate dynamic height based on lines
+    // Calculate dynamic height based on lines - mobile optimized
     const getResponsiveHeight = () => {
-      const basePadding = window.innerWidth <= 768 ? 12 : 16;
+      const basePadding =
+        window.innerWidth <= 480 ? 14 : window.innerWidth <= 768 ? 16 : 20;
       const lineHeight =
-        window.innerWidth <= 480 ? 20 : window.innerWidth <= 768 ? 24 : 28;
+        window.innerWidth <= 480 ? 22 : window.innerWidth <= 768 ? 26 : 32;
 
       if (needsMultiLine) {
-        return basePadding * 2 + lineHeight * lines + (lines - 1) * 4; // 4px between lines
+        return basePadding * 2 + lineHeight * lines + (lines - 1) * 6; // 6px between lines
       }
 
       return basePadding * 2 + lineHeight;
@@ -205,12 +290,22 @@ export default function ResearchQuestion() {
       WebkitBackdropFilter: "blur(10px)",
       width: `${getResponsiveWidth()}px`,
       minHeight: `${getResponsiveHeight()}px`,
-      padding: window.innerWidth <= 768 ? "12px 16px" : "16px 24px",
-      borderRadius: window.innerWidth <= 768 ? "50px" : "60px",
+      padding:
+        window.innerWidth <= 480
+          ? "14px 16px"
+          : window.innerWidth <= 768
+            ? "16px 20px"
+            : "20px 24px",
+      borderRadius:
+        window.innerWidth <= 480
+          ? "24px"
+          : window.innerWidth <= 768
+            ? "32px"
+            : "40px",
       boxShadow:
         "0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)",
       display: "flex",
-      alignItems: needsMultiLine ? "flex-start" : "center", // Top-align when multi-line
+      alignItems: needsMultiLine ? "flex-start" : "center",
       justifyContent: "space-between",
       left: "50%",
       zIndex: 10000,
@@ -401,28 +496,38 @@ export default function ResearchQuestion() {
               color: "#393939",
               fontSize:
                 window.innerWidth <= 480
-                  ? "0.9rem"
+                  ? "1rem"
                   : window.innerWidth <= 768
                     ? "1.1rem"
                     : "1.4rem",
               fontWeight: 900,
-              letterSpacing: window.innerWidth <= 768 ? "-0.3px" : "-0.8px",
+              letterSpacing:
+                window.innerWidth <= 480
+                  ? "-0.2px"
+                  : window.innerWidth <= 768
+                    ? "-0.3px"
+                    : "-0.8px",
               flex: 1,
               transition: "all 0.3s ease",
               display: "flex",
               alignItems: "flex-start",
-              paddingTop:
-                getSearchBarStyle().alignItems === "flex-start" ? "4px" : "0", // Align text properly when multi-line
+              paddingTop: needsMultiLine ? "2px" : "0",
               lineHeight:
                 window.innerWidth <= 480
-                  ? "1.4"
+                  ? "1.5"
                   : window.innerWidth <= 768
-                    ? "1.5"
-                    : "1.6",
+                    ? "1.6"
+                    : "1.7",
               wordWrap: "break-word",
               overflowWrap: "break-word",
-              whiteSpace: "normal", // Allow text wrapping
-              maxWidth: "calc(100% - 60px)", // Leave space for button
+              whiteSpace: "normal",
+              maxWidth: `calc(100% - ${window.innerWidth <= 480 ? "48px" : window.innerWidth <= 768 ? "52px" : "62px"})`, // Responsive button space
+              marginRight:
+                window.innerWidth <= 480
+                  ? "8px"
+                  : window.innerWidth <= 768
+                    ? "10px"
+                    : "12px",
             }}
           >
             {getTypedText()}
@@ -444,15 +549,30 @@ export default function ResearchQuestion() {
           <div
             onClick={handleButtonClick}
             style={{
-              width: window.innerWidth <= 768 ? "40px" : "50px",
-              height: window.innerWidth <= 768 ? "40px" : "50px",
+              width:
+                window.innerWidth <= 480
+                  ? "36px"
+                  : window.innerWidth <= 768
+                    ? "40px"
+                    : "50px",
+              height:
+                window.innerWidth <= 480
+                  ? "36px"
+                  : window.innerWidth <= 768
+                    ? "40px"
+                    : "50px",
               borderRadius: "50%",
               background: scrollProgress > 0.9 ? "#FF395C" : "#cccccc",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               color: "white",
-              fontSize: window.innerWidth <= 768 ? "14px" : "18px",
+              fontSize:
+                window.innerWidth <= 480
+                  ? "12px"
+                  : window.innerWidth <= 768
+                    ? "14px"
+                    : "18px",
               fontWeight: "bold",
               transition: "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
               cursor: isComplete ? "pointer" : "default",
@@ -463,12 +583,8 @@ export default function ResearchQuestion() {
                 ? "0 4px 12px rgba(255, 57, 92, 0.3)"
                 : "none",
               opacity: scrollProgress > 0.1 ? 1 : 0.7,
-              marginTop:
-                getSearchBarStyle().alignItems === "flex-start" ? "2px" : "0", // Adjust button position when multi-line
-              alignSelf:
-                getSearchBarStyle().alignItems === "flex-start"
-                  ? "flex-start"
-                  : "auto",
+              marginTop: needsMultiLine ? "2px" : "0",
+              alignSelf: needsMultiLine ? "flex-start" : "auto",
             }}
           >
             →
