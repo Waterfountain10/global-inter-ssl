@@ -1,124 +1,652 @@
-import React, {useEffect, useRef, useState, useCallback} from 'react'
-import './ResearchQuestion.css'
+import React, { useEffect, useRef, useState } from "react";
+import "./ResearchQuestion.css";
 
 const fullText =
-  'Does globalization lead to homogeneous interior spaces around the world?'
+  "Does globalization lead to homogeneous interior spaces around the world?";
 
 export default function ResearchQuestion() {
-  const containerRef = useRef(null)
-  const [typedText, setTypedText] = useState('')
-  const [isVisible, setIsVisible] = useState(false)
-  const [shouldType, setShouldType] = useState(false)
-  const [pinned, setPinned] = useState(false)
-  const [isPersistent, setIsPersistent] = useState(false)
-  const [showSearchBar, setShowSearchBar] = useState(false)
-  const [creditsTransition, setCreditsTransition] = useState(false)
+  const containerRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const [showSearchBar, setShowSearchBar] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0); // 0 to 1
+  const [isComplete, setIsComplete] = useState(false);
+  const [searchBarState, setSearchBarState] = useState("center"); // 'center', 'pinned', 'floating'
+  const [containerMode, setContainerMode] = useState("fixed"); // 'fixed', 'floating'
 
-  // helpers to block/unblock scroll
-  const preventDefault = (e) => e.preventDefault()
-  const preventScrollKeys = (e) => {
-    // space, page up/down, end/home, arrows
-    if ([32,33,34,35,36,37,38,39,40].includes(e.keyCode)) {
-      e.preventDefault()
-    }
-  }
-  const lockScroll = useCallback(() => {
-    document.documentElement.style.overflow = 'hidden'
-    document.body.style.overflow = 'hidden'
-    document.documentElement.style.overscrollBehavior = 'none'
-    document.body.style.overscrollBehavior = 'none'
-    window.addEventListener('wheel', preventDefault, {passive: false})
-    window.addEventListener('touchmove', preventDefault, {passive: false})
-    window.addEventListener('keydown', preventScrollKeys, {passive: false})
-  }, [])
-
-  // 1) observe entry
+  // Check for triggers from HomePage - enhanced for smooth transition
   useEffect(() => {
-    const obs = new IntersectionObserver(
-      ([entry]) => entry.isIntersecting && setIsVisible(true),
-      {threshold: 0.5}
-    )
-    if (containerRef.current) obs.observe(containerRef.current)
-    return () => obs.disconnect()
-  }, [])
+    const checkTriggers = () => {
+      if (sessionStorage.getItem("phaseTransition") === "true" && !isVisible) {
+        console.log("📍 ResearchQuestion: Smooth transition detected");
+        setIsVisible(true);
 
-  // 2) lock during typing, maintain lock until Map1 takes control
-  useEffect(() => {
-    if (shouldType) lockScroll()
-    // never unlock - let Map1 inherit the locked state
-  }, [shouldType, lockScroll])
-
-  // 3) start typing after TopFold triggers and section visible
-  useEffect(() => {
-    if (sessionStorage.getItem('startTyping') === 'true' && isVisible) {
-      sessionStorage.removeItem('startTyping')
-      setTypedText('')
-      setShowSearchBar(true) // show search bar when typing begins
-      const t = setTimeout(() => setShouldType(true), 1000)
-      return () => clearTimeout(t)
-    }
-  }, [isVisible])
-
-  // 4) typewriter → pulse → pin → persistent mode → trigger Map1
-  useEffect(() => {
-    if (!shouldType) return
-    ;(async () => {
-      for (let i = 0; i < fullText.length; i++) {
-        setTypedText((p) => p + fullText[i])
-        await new Promise((r) => setTimeout(r, 50))
-      }
-      setTimeout(() => {
-        const btn = document.querySelector('.search-button')
-        if (btn) {
-          btn.classList.add('clicked')
-          setTimeout(() => btn.classList.remove('clicked'), 1000)
-        }
+        // Delay search bar appearance for smoother transition with slow fade
         setTimeout(() => {
-          setPinned(true)
-          // trigger Map1 immediately when pinning starts
-          sessionStorage.setItem('showMap1', 'true')
-          setTimeout(() => {
-            setIsPersistent(true)
-          }, 800) // wait for pinning animation to complete
-        }, 500)
-      }, 500)
-    })()
-  }, [shouldType])
+          setShowSearchBar(true);
+          console.log(
+            "📍 ResearchQuestion: Search bar appearing after 1s delay with slow fade",
+          );
+        }, 1000); // Wait 1 second after TopFold scroll trigger
 
-  // 5) Listen for credits transition trigger
-  useEffect(() => {
-    const checkCreditsTransition = () => {
-      if (sessionStorage.getItem('creditsTransition') === 'true' && isPersistent) {
-        sessionStorage.removeItem('creditsTransition')
-        setCreditsTransition(true)
+        sessionStorage.removeItem("phaseTransition");
       }
+    };
+
+    const interval = setInterval(checkTriggers, 100);
+    return () => clearInterval(interval);
+  }, [isVisible]);
+
+  // Function to trigger Map1 reveal
+  const triggerMap1 = () => {
+    console.log("🗺️ Triggering Map1 reveal");
+    setSearchBarState("floating");
+    setContainerMode("floating");
+
+    setTimeout(() => {
+      sessionStorage.setItem("showMap1", "true");
+      console.log("🗺️ Map1 trigger set");
+    }, 300);
+  };
+
+  // Enhanced scroll handler for smooth typing effect
+  useEffect(() => {
+    if (!showSearchBar) return;
+
+    const handleScroll = () => {
+      const scrollY = window.pageYOffset;
+      const windowHeight = window.innerHeight;
+
+      // Adjust scroll ranges for smooth transition
+      // Phase 1: Typing (starts later to account for transition)
+      const startScroll = windowHeight * 1.0; // Start typing after transition area
+      const endScroll = windowHeight * 2.2; // Extended range for more control
+
+      // Phase 2: Float up (2.8vh+)
+      const floatTriggerScroll = windowHeight * 2.8;
+
+      if (scrollY < startScroll) {
+        setScrollProgress(0);
+        if (isComplete) {
+          setIsComplete(false);
+          setSearchBarState("center");
+          setContainerMode("fixed");
+          console.log("🔄 Reset typing state - scrolled back up");
+        }
+      } else if (scrollY >= startScroll && scrollY <= endScroll) {
+        // Typing phase - smoother progression
+        const progress = (scrollY - startScroll) / (endScroll - startScroll);
+        const smoothProgress = Math.pow(progress, 0.8); // Slightly ease the progression
+        setScrollProgress(Math.max(0, Math.min(1, smoothProgress)));
+
+        if (smoothProgress >= 0.95 && !isComplete) {
+          setIsComplete(true);
+          setSearchBarState("pinned");
+          setContainerMode("fixed");
+          console.log("✅ Smooth typing complete - search bar pinned");
+        }
+      } else if (scrollY > endScroll) {
+        // Beyond typing range - ensure completion
+        if (!isComplete) {
+          setScrollProgress(1);
+          setIsComplete(true);
+          setSearchBarState("pinned");
+          setContainerMode("fixed");
+          console.log("✅ Force complete typing - scrolled beyond range");
+        }
+
+        if (scrollY > floatTriggerScroll && containerMode === "fixed") {
+          // Float up phase
+          console.log("🚀 Float trigger scroll reached");
+          triggerMap1();
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [showSearchBar, isComplete, containerMode]);
+
+  // Calculate typed text based on scroll progress with smoother character reveal
+  const getTypedText = () => {
+    // Use easing function for smoother character appearance
+    const easedProgress = 1 - Math.pow(1 - scrollProgress, 2); // Ease-out curve
+    const charCount = Math.floor(easedProgress * fullText.length);
+    return fullText.slice(0, charCount);
+  };
+
+  // Calculate if text needs multiple lines - moved to component level
+  const getTextDimensions = () => {
+    const currentText = getTypedText();
+    const fontSize =
+      window.innerWidth <= 480 ? 16 : window.innerWidth <= 768 ? 18 : 24;
+    const charWidth = fontSize * 0.6;
+    const textWidthPx = currentText.length * charWidth;
+
+    // Mobile-optimized spacing
+    const buttonWidth =
+      window.innerWidth <= 480 ? 36 : window.innerWidth <= 768 ? 40 : 50;
+    const horizontalPadding =
+      window.innerWidth <= 480 ? 24 : window.innerWidth <= 768 ? 32 : 48;
+    const spacing =
+      window.innerWidth <= 480 ? 12 : window.innerWidth <= 768 ? 16 : 20;
+
+    // Responsive max width
+    let maxWidth;
+    if (window.innerWidth <= 480) {
+      maxWidth = window.innerWidth * 0.95;
+    } else if (window.innerWidth <= 768) {
+      maxWidth = window.innerWidth * 0.9;
+    } else {
+      maxWidth = 800;
     }
-    const interval = setInterval(checkCreditsTransition, 50)
-    return () => clearInterval(interval)
-  }, [isPersistent])
+
+    const maxSingleLineWidth =
+      maxWidth - buttonWidth - horizontalPadding - spacing;
+
+    // Determine if we need multiple lines
+    const needsMultiLine = textWidthPx > maxSingleLineWidth;
+    const lines = needsMultiLine
+      ? Math.ceil(textWidthPx / maxSingleLineWidth)
+      : 1;
+
+    return { needsMultiLine, lines, textWidthPx, maxSingleLineWidth, maxWidth };
+  };
+
+  // Add window resize listener for real-time responsiveness
+  useEffect(() => {
+    const handleResize = () => {
+      // Force re-render on window resize for responsive calculations
+      // This ensures the search bar resizes properly when switching between mobile/desktop
+      setScrollProgress((prev) => prev); // Trigger re-render
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Get current text dimensions
+  const { needsMultiLine, lines, maxWidth } = getTextDimensions();
+  const handleButtonClick = () => {
+    if (isComplete) {
+      // If typing is complete, trigger Map1 reveal
+      triggerMap1();
+    } else {
+      // If typing is in progress, scroll down to advance the typing
+      const windowHeight = window.innerHeight;
+      const currentScroll = window.pageYOffset;
+      const targetScroll = currentScroll + windowHeight * 0.3; // Scroll down 30% of viewport
+
+      window.scrollTo({
+        top: targetScroll,
+        behavior: "smooth",
+      });
+
+      console.log("🔽 Button clicked - scrolling down to advance typing");
+    }
+  };
+
+  // Enhanced responsive search bar with mobile-optimized multi-line support
+  const getSearchBarStyle = () => {
+    const currentText = getTypedText();
+
+    // Mobile-first responsive calculations
+    const getTextDimensions = () => {
+      // Responsive font sizes
+      const fontSize =
+        window.innerWidth <= 480 ? 16 : window.innerWidth <= 768 ? 18 : 24;
+      const charWidth = fontSize * 0.6; // More accurate character width
+      const textWidthPx = currentText.length * charWidth;
+
+      // Mobile-optimized spacing
+      const buttonWidth =
+        window.innerWidth <= 480 ? 36 : window.innerWidth <= 768 ? 40 : 50;
+      const horizontalPadding =
+        window.innerWidth <= 480 ? 24 : window.innerWidth <= 768 ? 32 : 48;
+      const spacing =
+        window.innerWidth <= 480 ? 12 : window.innerWidth <= 768 ? 16 : 20;
+
+      // Responsive max width - much smaller for mobile
+      let maxWidth;
+      if (window.innerWidth <= 480) {
+        maxWidth = window.innerWidth * 0.95; // 95% on mobile
+      } else if (window.innerWidth <= 768) {
+        maxWidth = window.innerWidth * 0.9; // 90% on tablet
+      } else {
+        maxWidth = 800; // Fixed max on desktop
+      }
+
+      const maxSingleLineWidth =
+        maxWidth - buttonWidth - horizontalPadding - spacing;
+
+      // Determine if we need multiple lines
+      const needsMultiLine = textWidthPx > maxSingleLineWidth;
+      const lines = needsMultiLine
+        ? Math.ceil(textWidthPx / maxSingleLineWidth)
+        : 1;
+
+      return {
+        needsMultiLine,
+        lines,
+        textWidthPx,
+        maxSingleLineWidth,
+        maxWidth,
+      };
+    };
+
+    const { needsMultiLine, lines, maxWidth } = getTextDimensions();
+
+    // Calculate dynamic width - mobile optimized
+    const getResponsiveWidth = () => {
+      if (needsMultiLine) {
+        return maxWidth; // Use calculated max width
+      }
+
+      // Single-line responsive width
+      const fontSize =
+        window.innerWidth <= 480 ? 16 : window.innerWidth <= 768 ? 18 : 24;
+      const charWidth = fontSize * 0.6;
+      const textWidthPx = currentText.length * charWidth;
+      const buttonWidth =
+        window.innerWidth <= 480 ? 36 : window.innerWidth <= 768 ? 40 : 50;
+      const horizontalPadding =
+        window.innerWidth <= 480 ? 24 : window.innerWidth <= 768 ? 32 : 48;
+      const spacing =
+        window.innerWidth <= 480 ? 12 : window.innerWidth <= 768 ? 16 : 20;
+
+      // Mobile-friendly minimum widths
+      let minWidth;
+      if (window.innerWidth <= 480) {
+        minWidth = 280; // Smaller minimum for mobile
+      } else if (window.innerWidth <= 768) {
+        minWidth = 350; // Medium minimum for tablet
+      } else {
+        minWidth = 480; // Desktop minimum
+      }
+
+      const neededWidth =
+        textWidthPx + buttonWidth + horizontalPadding + spacing;
+
+      return Math.max(minWidth, Math.min(maxWidth, neededWidth));
+    };
+
+    // Calculate dynamic height based on lines - mobile optimized
+    const getResponsiveHeight = () => {
+      const basePadding =
+        window.innerWidth <= 480 ? 14 : window.innerWidth <= 768 ? 16 : 20;
+      const lineHeight =
+        window.innerWidth <= 480 ? 22 : window.innerWidth <= 768 ? 26 : 32;
+
+      if (needsMultiLine) {
+        return basePadding * 2 + lineHeight * lines + (lines - 1) * 6; // 6px between lines
+      }
+
+      return basePadding * 2 + lineHeight;
+    };
+
+    const baseStyle = {
+      position: "fixed",
+      background: "#ffffff",
+      backdropFilter: "blur(10px)",
+      WebkitBackdropFilter: "blur(10px)",
+      width: `${getResponsiveWidth()}px`,
+      minHeight: `${getResponsiveHeight()}px`,
+      padding:
+        window.innerWidth <= 480
+          ? "14px 16px"
+          : window.innerWidth <= 768
+            ? "16px 20px"
+            : "20px 24px",
+      borderRadius:
+        window.innerWidth <= 480
+          ? "24px"
+          : window.innerWidth <= 768
+            ? "32px"
+            : "40px",
+      boxShadow:
+        "0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)",
+      display: "flex",
+      alignItems: needsMultiLine ? "flex-start" : "center",
+      justifyContent: "space-between",
+      left: "50%",
+      zIndex: 10000,
+      transition: "all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+      opacity: 0,
+      transform: "translateX(-50%)",
+    };
+
+    // Position and visibility based on state
+    if (searchBarState === "center") {
+      return {
+        ...baseStyle,
+        top: "50%",
+        transform: "translate(-50%, -50%)",
+        opacity: showSearchBar ? 1 : 0,
+        animation: showSearchBar
+          ? "slowFadeInCentered 2s ease-out forwards"
+          : "none",
+      };
+    } else if (searchBarState === "pinned") {
+      return {
+        ...baseStyle,
+        top: window.innerWidth <= 768 ? "60px" : "80px",
+        transform: "translateX(-50%)",
+        opacity: 1,
+        animation: "none",
+      };
+    } else if (searchBarState === "floating") {
+      const scrollY = window.pageYOffset;
+      const windowHeight = window.innerHeight;
+      const floatStartScroll = windowHeight * 2.8;
+      const floatProgress = Math.min(
+        1,
+        Math.max(0, (scrollY - floatStartScroll) / (windowHeight * 0.8)),
+      );
+      const easedFloatProgress = Math.pow(floatProgress, 0.6);
+
+      return {
+        ...baseStyle,
+        top: window.innerWidth <= 768 ? "60px" : "80px",
+        transform: `translateX(-50%) translateY(${-easedFloatProgress * 200}px)`,
+        opacity: Math.max(0.2, 1 - easedFloatProgress * 0.8),
+        animation: "none",
+      };
+    }
+
+    return baseStyle;
+  };
+
+  // Calculate instruction text position relative to search bar
+  const getInstructionTextStyle = () => {
+    const baseStyle = {
+      position: "fixed",
+      left: "50%",
+      transform: "translateX(-50%)",
+      textAlign: "center",
+      color: "#666",
+      fontSize: window.innerWidth <= 768 ? "1rem" : "1.1rem",
+      zIndex: 100,
+      opacity: 0,
+      padding: "0 20px",
+      maxWidth: "90%",
+      animation: "slowFadeIn 2s ease-out forwards",
+    };
+
+    if (searchBarState === "center") {
+      return {
+        ...baseStyle,
+        top: "calc(50% - 120px)",
+      };
+    } else if (searchBarState === "pinned") {
+      return {
+        ...baseStyle,
+        top:
+          window.innerWidth <= 768 ? "calc(60px - 80px)" : "calc(80px - 100px)",
+      };
+    }
+
+    return baseStyle;
+  };
+
+  // Calculate continue instruction position relative to search bar
+  const getContinueInstructionStyle = () => {
+    const baseStyle = {
+      position: "fixed",
+      left: "50%",
+      transform: "translateX(-50%)",
+      textAlign: "center",
+      color: "#666",
+      fontSize: window.innerWidth <= 768 ? "1rem" : "1.1rem",
+      zIndex: 100,
+      opacity: 0,
+      padding: "0 20px",
+      maxWidth: "90%",
+      animation: "slowFadeIn 1.5s ease-out forwards",
+    };
+
+    if (searchBarState === "center") {
+      return {
+        ...baseStyle,
+        top: "calc(50% + 120px)",
+      };
+    } else if (searchBarState === "pinned") {
+      return {
+        ...baseStyle,
+        top:
+          window.innerWidth <= 768
+            ? "calc(60px + 100px)"
+            : "calc(80px + 120px)",
+      };
+    }
+
+    return baseStyle;
+  };
 
   return (
     <>
+      {/* Main container */}
       <div
         ref={containerRef}
-        className={`research-question${shouldType && !isPersistent ? ' locked' : ''}`}
+        className="research-question"
+        style={{
+          position: containerMode === "fixed" ? "fixed" : "relative",
+          top: containerMode === "fixed" ? 0 : "auto",
+          left: containerMode === "fixed" ? 0 : "auto",
+          width: "100%",
+          height: containerMode === "fixed" ? "100vh" : "auto",
+          minHeight: containerMode === "floating" ? "100vh" : "auto",
+          background: "#EEEEEE",
+          zIndex: containerMode === "fixed" ? 80 : 20,
+          opacity: isVisible ? 1 : 0,
+          transition: "opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+          overflow: containerMode === "fixed" ? "hidden" : "visible",
+        }}
       >
-        {/* Empty container for intersection observer */}
+        {/* Scroll instruction - positioned relative to search bar */}
+        {showSearchBar &&
+          scrollProgress < 0.02 &&
+          searchBarState === "center" &&
+          containerMode === "fixed" && (
+            <div style={getInstructionTextStyle()}>
+              <div style={{ marginBottom: "10px", lineHeight: 1.4 }}>
+                {window.innerWidth <= 768
+                  ? "Scroll to reveal the question"
+                  : "Scroll down to reveal the research question"}
+              </div>
+              <div
+                style={{
+                  fontSize: window.innerWidth <= 768 ? "1.5rem" : "1.8rem",
+                  color: "#FF395C",
+                  animation: "bounce 2s infinite 2s",
+                }}
+              >
+                ↓
+              </div>
+            </div>
+          )}
+
+        {/* Continue instruction - positioned relative to search bar */}
+        {showSearchBar &&
+          isComplete &&
+          searchBarState === "pinned" &&
+          containerMode === "fixed" && (
+            <div style={getContinueInstructionStyle()}>
+              <div style={{ marginBottom: "10px", lineHeight: 1.4 }}>
+                {window.innerWidth <= 768
+                  ? "Continue scrolling to explore"
+                  : "Continue scrolling or click the button to explore the maps"}
+              </div>
+              <div
+                style={{
+                  fontSize: window.innerWidth <= 768 ? "1.5rem" : "1.8rem",
+                  color: "#FF395C",
+                  animation: "bounce 2s infinite 1.5s",
+                }}
+              >
+                ↓
+              </div>
+            </div>
+          )}
       </div>
-      
-      {/* Persistent Search Bar - only visible during ResearchQuestion typing and beyond */}
+
+      {/* Enhanced multi-line search bar */}
       {showSearchBar && (
-        <div className={`persistent-search-bar${pinned ? ' pinned' : ''}${isPersistent ? ' persistent' : ''}${creditsTransition ? ' credits-transition' : ''}`}>
-          <span className="typed-text">{typedText}</span>
-          <button className="search-button">
-            <img
-              src="/assets/images/search_button.svg"
-              alt="Search"
-              className="search-icon"
-            />
-          </button>
+        <div style={getSearchBarStyle()}>
+          <div
+            style={{
+              color: "#393939",
+              fontSize:
+                window.innerWidth <= 480
+                  ? "1rem"
+                  : window.innerWidth <= 768
+                    ? "1.1rem"
+                    : "1.4rem",
+              fontWeight: 900,
+              letterSpacing:
+                window.innerWidth <= 480
+                  ? "-0.2px"
+                  : window.innerWidth <= 768
+                    ? "-0.3px"
+                    : "-0.8px",
+              flex: 1,
+              transition: "all 0.3s ease",
+              display: "flex",
+              alignItems: "flex-start",
+              paddingTop: needsMultiLine ? "2px" : "0",
+              lineHeight:
+                window.innerWidth <= 480
+                  ? "1.5"
+                  : window.innerWidth <= 768
+                    ? "1.6"
+                    : "1.7",
+              wordWrap: "break-word",
+              overflowWrap: "break-word",
+              whiteSpace: "normal",
+              maxWidth: `calc(100% - ${window.innerWidth <= 480 ? "48px" : window.innerWidth <= 768 ? "52px" : "62px"})`, // Responsive button space
+              marginRight:
+                window.innerWidth <= 480
+                  ? "8px"
+                  : window.innerWidth <= 768
+                    ? "10px"
+                    : "12px",
+            }}
+          >
+            {getTypedText()}
+            {scrollProgress > 0 && scrollProgress < 0.98 && (
+              <span
+                style={{
+                  animation: "blink 1s step-end infinite",
+                  marginLeft: "4px",
+                  opacity: scrollProgress > 0.02 ? 1 : 0,
+                  transition: "opacity 0.3s ease",
+                  display: "inline-block",
+                }}
+              >
+                |
+              </span>
+            )}
+          </div>
+
+          <div
+            onClick={handleButtonClick}
+            style={{
+              width:
+                window.innerWidth <= 480
+                  ? "36px"
+                  : window.innerWidth <= 768
+                    ? "40px"
+                    : "50px",
+              height:
+                window.innerWidth <= 480
+                  ? "36px"
+                  : window.innerWidth <= 768
+                    ? "40px"
+                    : "50px",
+              borderRadius: "50%",
+              background: scrollProgress > 0.9 ? "#FF395C" : "#cccccc",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "white",
+              fontSize:
+                window.innerWidth <= 480
+                  ? "12px"
+                  : window.innerWidth <= 768
+                    ? "14px"
+                    : "18px",
+              fontWeight: "bold",
+              transition: "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+              cursor: isComplete ? "pointer" : "default",
+              transform: isComplete ? "scale(1.05)" : "scale(1)",
+              flexShrink: 0,
+              userSelect: "none",
+              boxShadow: isComplete
+                ? "0 4px 12px rgba(255, 57, 92, 0.3)"
+                : "none",
+              opacity: scrollProgress > 0.1 ? 1 : 0.7,
+              marginTop: needsMultiLine ? "2px" : "0",
+              alignSelf: needsMultiLine ? "flex-start" : "auto",
+            }}
+          >
+            →
+          </div>
         </div>
       )}
+
+      <style>{`
+        @keyframes slowFadeIn {
+          0% {
+            opacity: 0;
+            transform: translateX(-50%) translateY(20px) scale(0.95);
+          }
+          100% {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0) scale(1);
+          }
+        }
+
+        @keyframes blink {
+          0%, 50% { opacity: 1; }
+          51%, 100% { opacity: 0; }
+        }
+
+        @keyframes bounce {
+          0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0);
+          }
+          40% {
+            transform: translateY(-10px);
+          }
+          60% {
+            transform: translateY(-5px);
+          }
+        }
+
+        html {
+          scroll-behavior: smooth;
+        }
+
+        .research-question {
+          will-change: opacity, transform;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+          }
+
+          html {
+            scroll-behavior: auto;
+          }
+
+          .slowFadeIn {
+            animation: none !important;
+            opacity: 1 !important;
+            transform: none !important;
+          }
+        }
+      `}</style>
     </>
-  )
+  );
 }

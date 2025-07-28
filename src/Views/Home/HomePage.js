@@ -1,6 +1,6 @@
-// src/Views/HomePage.js
+// src/Views/HomePage.js - Simplified smooth transition
 import React, { useState, useEffect, useCallback } from "react";
-import "./HomePage";
+import "./HomePage.css";
 import TopFold from "../TopFold/TopFold";
 import ResearchQuestion from "../ResearchQuestion/ResearchQuestion";
 import Map1 from "../Map1/Map1";
@@ -12,397 +12,532 @@ import Map6 from "../Map6/Map6";
 import Credits from "../Credits/Credits";
 
 export default function HomePage() {
-  const [stage, setStage] = useState(0); // 0 → TopFold/ResearchQuestion, 1 → Map1, 2 → Map2, 3 → Map3, 4 → Map4, 5 → Map5, 6 → Map6, 7 → Credits
-  const [advancing, setAdvancing] = useState(false);
-  const [transitionLocked, setTransitionLocked] = useState(false); // Global transition lock
-  const [creditsScrollProgress, setCreditsScrollProgress] = useState(0); // Progressive reveal tracker
+  const [scrollMode, setScrollMode] = useState("LOCKED"); // LOCKED, UNLOCKED
+  const [currentPhase, setCurrentPhase] = useState("TOPFOLD"); // TOPFOLD, RESEARCH, MAPS
+  const [scrollY, setScrollY] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false); // For smooth transition
+  const [mapProgress, setMapProgress] = useState({
+    map1: 0,
+    map2: 0,
+    map3: 0,
+    map4: 0,
+    map5: 0,
+    map6: 0,
+    credits: 0,
+  });
 
-  // Phase Management System
-  const [currentPhase, setCurrentPhase] = useState("TOPFOLD"); // TOPFOLD | RESEARCH_TYPING | MAP_TRANSITIONS
+  // Initialize with complete scroll lock
+  useEffect(() => {
+    console.log("🏁 HomePage initializing - locking scroll");
 
-  // unlock scroll helper
-  const unlockScroll = useCallback(() => {
-    document.documentElement.style.overflow = "";
-    document.body.style.overflow = "";
-    document.documentElement.style.overscrollBehavior = "";
-    document.body.style.overscrollBehavior = "";
-    const preventDefault = (e) => e.preventDefault();
-    const preventScrollKeys = (e) => {
-      if ([32, 33, 34, 35, 36, 37, 38, 39, 40].includes(e.keyCode)) {
-        e.preventDefault();
-      }
+    // Force to top
+    window.scrollTo(0, 0);
+
+    // Complete scroll lock
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.position = "fixed";
+    document.documentElement.style.top = "0";
+    document.documentElement.style.left = "0";
+    document.documentElement.style.width = "100%";
+    document.documentElement.style.height = "100%";
+
+    setScrollMode("LOCKED");
+    setCurrentPhase("TOPFOLD");
+
+    console.log("✅ Scroll locked completely");
+
+    return () => {
+      // Cleanup on unmount
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+      document.documentElement.style.position = "";
+      document.documentElement.style.top = "";
+      document.documentElement.style.left = "";
+      document.documentElement.style.width = "";
+      document.documentElement.style.height = "";
     };
-    window.removeEventListener("wheel", preventDefault);
-    window.removeEventListener("touchmove", preventDefault);
-    window.removeEventListener("keydown", preventScrollKeys);
   }, []);
 
-  // Phase 1 → 2: TOPFOLD to RESEARCH_TYPING (triggered at scroll midpoint)
-  useEffect(() => {
-    const checkPhaseTransition = () => {
-      if (
-        sessionStorage.getItem("phaseTransition") === "true" &&
-        currentPhase === "TOPFOLD"
-      ) {
-        sessionStorage.removeItem("phaseTransition");
-        setCurrentPhase("RESEARCH_TYPING");
-      }
-    };
-    const interval = setInterval(checkPhaseTransition, 50);
-    return () => clearInterval(interval);
-  }, [currentPhase]);
+  // Handle TopFold scroll trigger - smooth transition
+  const handleTopFoldScroll = useCallback(() => {
+    console.log(
+      "🚀 HomePage: TopFold scroll triggered - starting smooth transition!",
+    );
 
-  // Search bar materialization (triggered after scroll completion)
-  useEffect(() => {
-    const checkTypingStart = () => {
-      if (
-        sessionStorage.getItem("startTyping") === "true" &&
-        currentPhase === "RESEARCH_TYPING"
-      ) {
-        // startTyping signal is handled by ResearchQuestion component
-        // no need to remove here as ResearchQuestion will handle it
-      }
-    };
-    const interval = setInterval(checkTypingStart, 50);
-    return () => clearInterval(interval);
-  }, [currentPhase]);
+    setIsTransitioning(true);
 
-  // Phase 2 → 3: RESEARCH_TYPING to MAP_TRANSITIONS (when search bar completes pinning)
+    // Start the slide-up animation
+    setTimeout(() => {
+      // Remove all scroll locks
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+      document.documentElement.style.position = "";
+      document.documentElement.style.top = "";
+      document.documentElement.style.left = "";
+      document.documentElement.style.width = "";
+      document.documentElement.style.height = "";
+
+      console.log("✅ Scroll locks removed");
+
+      // Update state
+      setScrollMode("UNLOCKED");
+      setCurrentPhase("RESEARCH");
+
+      // Trigger research question immediately (no delay)
+      sessionStorage.setItem("phaseTransition", "true");
+      console.log("✅ Research phase transition triggered");
+
+      // Small scroll to get user started
+      setTimeout(() => {
+        window.scrollTo({
+          top: window.innerHeight * 0.1,
+          behavior: "smooth",
+        });
+        console.log("✅ Initial scroll initiated");
+
+        // End transition state
+        setTimeout(() => {
+          setIsTransitioning(false);
+        }, 1000);
+      }, 200);
+    }, 100); // Small delay for smooth animation start
+  }, []);
+
+  // Listen for Map1 trigger
   useEffect(() => {
-    const checkSearchComplete = () => {
+    const checkMapTrigger = () => {
       if (
         sessionStorage.getItem("showMap1") === "true" &&
-        currentPhase === "RESEARCH_TYPING"
+        currentPhase === "RESEARCH"
       ) {
+        console.log("🗺️ Map phase triggered - transitioning to MAPS");
+        setCurrentPhase("MAPS");
         sessionStorage.removeItem("showMap1");
-        setCurrentPhase("MAP_TRANSITIONS");
-        setStage(1); // show Map1
+
+        // Ensure scroll is still enabled
+        document.documentElement.style.overflow = "";
+        document.body.style.overflow = "";
       }
     };
-    const interval = setInterval(checkSearchComplete, 100);
+
+    const interval = setInterval(checkMapTrigger, 50); // Check more frequently
     return () => clearInterval(interval);
   }, [currentPhase]);
 
-  // Global scroll management system - standardized sensitivity and timing
+  // Also check for direct scroll-based phase transition as backup
   useEffect(() => {
-    if (currentPhase !== "MAP_TRANSITIONS" || transitionLocked) return;
+    if (scrollMode === "UNLOCKED" && currentPhase === "RESEARCH") {
+      const windowHeight = window.innerHeight;
+      const mapTriggerScroll = windowHeight * 2.5;
 
-    let scrollTimeout = null;
-    let creditsRevealProgress = 0;
-    const SCROLL_THRESHOLD = 50; // Standardized scroll distance requirement
-    const CREDITS_REVEAL_RANGE = 300; // Pixels needed to fully reveal credits
-
-    const handleGlobalScroll = (e) => {
-      console.log(
-        "🔍 SCROLL EVENT DETECTED - deltaY:",
-        e.deltaY,
-        "stage:",
-        stage,
-        "advancing:",
-        advancing,
-        "transitionLocked:",
-        transitionLocked,
-      );
-
-      // Handle Credits progressive reveal at Map6
-      if (stage === 6 && !advancing) {
-        e.preventDefault();
-
-        // Track cumulative scroll for progressive reveal
-        creditsRevealProgress += e.deltaY;
-        creditsRevealProgress = Math.max(0, creditsRevealProgress); // Prevent negative values
-
-        const scrollProgress = Math.min(
-          creditsRevealProgress / CREDITS_REVEAL_RANGE,
-          1,
-        );
-        setCreditsScrollProgress(scrollProgress);
-
-        console.log(
-          "🎯 Credits reveal progress:",
-          scrollProgress,
-          "cumulative scroll:",
-          creditsRevealProgress,
-        );
-
-        // Trigger Credits mounting when reveal begins
-        if (scrollProgress > 0.1 && stage !== 7) {
-          console.log("🚀 Triggering Credits mount for progressive reveal");
-          sessionStorage.setItem("creditsTransition", "true");
-          setStage(7);
-        }
-
-        // Lock credits in final position when fully revealed
-        if (scrollProgress >= 1) {
-          setTransitionLocked(true);
-          setTimeout(() => unlockScroll(), 1000);
-          console.log("🔒 Credits fully revealed and locked");
-        }
-
-        return; // Skip normal scroll handling during credits reveal
+      if (scrollY > mapTriggerScroll) {
+        console.log("🗺️ Direct scroll trigger - transitioning to MAPS");
+        setCurrentPhase("MAPS");
       }
-
-      // Standard scroll detection for other stages
-      if (Math.abs(e.deltaY) > SCROLL_THRESHOLD && e.deltaY > 0 && !advancing) {
-        if (scrollTimeout) {
-          console.log("⚠️ Scroll blocked by timeout");
-          return; // Prevent multiple rapid triggers
-        }
-
-        console.log("🎯 Scroll detected on stage", stage, "deltaY:", e.deltaY);
-
-        // IMMEDIATE VISUAL FEEDBACK: Apply advancing class directly to DOM
-        if (stage === 1) {
-          const map1Container = document.querySelector(".map1-container");
-          console.log("🔍 Map1 container found:", !!map1Container);
-          if (map1Container) {
-            console.log("🔍 Adding advancing class to Map1");
-            map1Container.classList.add("advancing");
-            console.log(
-              "🔍 Map1 classes after addition:",
-              map1Container.className,
-            );
-          }
-        }
-
-        setTransitionLocked(true); // Lock all transitions
-        scrollTimeout = setTimeout(() => {
-          scrollTimeout = null;
-        }, 2000); // Extended throttle for consistency
-
-        // Determine current stage and advance accordingly with enhanced debugging
-        if (stage === 1) {
-          console.log("🔥 Advancing from Map1 to Map2");
-          handleAdvance();
-        } else if (stage === 2) {
-          console.log("🔥 Advancing from Map2 to Map3");
-          handleAdvanceToMap3();
-        } else if (stage === 3) {
-          console.log("🔥 Advancing from Map3 to Map4");
-          handleAdvanceToMap4();
-        } else if (stage === 4) {
-          console.log("🔥 Advancing from Map4 to Map5");
-          handleAdvanceToMap5();
-        } else if (stage === 5) {
-          console.log("🔥 Advancing from Map5 to Map6");
-          handleAdvanceToMap6();
-        } else {
-          console.log(
-            "⚠️ Scroll detected but no valid stage transition available. Current stage:",
-            stage,
-          );
-        }
-      } else {
-        console.log(
-          "🚫 Scroll conditions not met - threshold:",
-          Math.abs(e.deltaY) > SCROLL_THRESHOLD,
-          "direction:",
-          e.deltaY > 0,
-          "not advancing:",
-          !advancing,
-        );
-      }
-    };
-
-    window.addEventListener("wheel", handleGlobalScroll, { passive: false });
-    return () => {
-      window.removeEventListener("wheel", handleGlobalScroll);
-      if (scrollTimeout) clearTimeout(scrollTimeout);
-    };
-  }, [currentPhase, stage, advancing, transitionLocked, unlockScroll]);
-
-  // unlock scroll only after Credits appears - ensure Credits is final stage
-  useEffect(() => {
-    if (stage === 7) {
-      const timer = setTimeout(() => {
-        console.log("🔓 Unlocking scroll after Credits completion");
-        unlockScroll();
-      }, 2000); // unlock after Credits fade-in completes
-      return () => clearTimeout(timer);
     }
-  }, [stage, unlockScroll]);
+  }, [scrollY, scrollMode, currentPhase]);
 
-  const handleAdvance = () => {
-    console.log("🎯 Map1 handleAdvance triggered, setting advancing=true");
-    // trigger Map1 slide‑up animation
-    setAdvancing(true);
-    // Standardized timing: wait for text slide-up completion (1.5s) + buffer (0.5s) = 2s total
-    setTimeout(() => {
-      console.log("🔄 Transitioning to stage 2, resetting advancing=false");
-      setStage(2);
-      setAdvancing(false); // Reset advancing state for Map2
-      setTransitionLocked(false); // Unlock transitions for next stage
-    }, 2000); // Standardized 2-second transition timing
-  };
+  // Scroll handler for when unlocked - calculate map progress
+  useEffect(() => {
+    if (scrollMode !== "UNLOCKED") return;
 
-  const handleAdvanceToMap3 = () => {
-    console.log(
-      "🎯 Map2 handleAdvanceToMap3 triggered, setting advancing=true",
-    );
-    // trigger Map2 slide‑up animation
-    setAdvancing(true);
-    // Standardized timing: wait for text slide-up completion (1.5s) + buffer (0.5s) = 2s total
-    setTimeout(() => {
-      console.log("🔄 Transitioning to stage 3, resetting advancing=false");
-      setStage(3);
-      setAdvancing(false); // Reset advancing state for Map3
-      setTransitionLocked(false); // Unlock transitions for next stage
-    }, 2000); // Standardized 2-second transition timing
-  };
+    const handleScroll = () => {
+      const scrollY = window.pageYOffset;
+      const windowHeight = window.innerHeight;
 
-  const handleAdvanceToMap4 = () => {
-    console.log(
-      "🎯 Map3 handleAdvanceToMap4 triggered, setting advancing=true",
-    );
-    // trigger Map3 slide‑up animation - EXACT SAME LOGIC AS Map2→Map3
-    setAdvancing(true);
-    // Standardized timing: wait for text slide-up completion (1.5s) + buffer (0.5s) = 2s total
-    setTimeout(() => {
-      console.log("🔄 Transitioning to stage 4, resetting advancing=false");
-      setStage(4);
-      setAdvancing(false); // Reset advancing state for Map4
-      setTransitionLocked(false); // Unlock transitions for next stage
-    }, 2000); // Exact same 2-second timing as Map2→Map3
-  };
+      setScrollY(scrollY);
 
-  const handleAdvanceToMap5 = () => {
-    console.log(
-      "🎯 Map4 handleAdvanceToMap5 triggered, setting advancing=true",
-    );
-    // trigger Map4 slide‑up animation
-    setAdvancing(true);
-    // Standardized timing: wait for text slide-up completion (1.5s) + buffer (0.5s) = 2s total
-    setTimeout(() => {
-      console.log("🔄 Transitioning to stage 5, resetting advancing=false");
-      setStage(5);
-      setAdvancing(false); // Reset advancing state for Map5
-      setTransitionLocked(false); // Unlock transitions for next stage
-    }, 2000); // Exact same 2-second timing as other transitions
-  };
+      // Calculate map progress based on scroll position
+      if (currentPhase === "MAPS") {
+        // Map1 becomes active after research question phase (around 3vh)
+        const map1StartScroll = windowHeight * 3;
+        const map1EndScroll = windowHeight * 5;
 
-  const handleAdvanceToMap6 = () => {
-    console.log(
-      "🎯 Map5 handleAdvanceToMap6 triggered, setting advancing=true",
-    );
-    // trigger Map5 slide‑up animation
-    setAdvancing(true);
-    // Standardized timing: wait for text slide-up completion (1.5s) + buffer (0.5s) = 2s total
-    setTimeout(() => {
-      console.log("🔄 Transitioning to stage 6, resetting advancing=false");
-      setStage(6);
-      setAdvancing(false); // Reset advancing state for Map6
-      setTransitionLocked(false); // Unlock transitions for next stage
-    }, 2000); // Exact same 2-second timing as other transitions
-  };
+        // Map2 starts after Map1
+        const map2StartScroll = windowHeight * 5;
+        const map2EndScroll = windowHeight * 7;
 
-  const handleAdvanceToCredits = () => {
-    console.log(
-      "🎯 Map6 handleAdvanceToCredits triggered, setting advancing=true",
-    );
-    // trigger search bar slide-up animation FIRST
-    sessionStorage.setItem("creditsTransition", "true");
-    // trigger Map6 slide‑up animation
-    setAdvancing(true);
-    // Standardized timing: wait for text slide-up completion (1.5s) + buffer (0.5s) = 2s total
-    setTimeout(() => {
-      console.log(
-        "🔄 Transitioning to stage 7 (Credits), resetting advancing=false",
-      );
-      setStage(7);
-      setAdvancing(false); // Reset advancing state for Credits
-      setTransitionLocked(false); // Unlock transitions for final stage
-    }, 2000); // Exact same 2-second timing as other transitions
-  };
+        // Map3 starts after Map2
+        const map3StartScroll = windowHeight * 7;
+        const map3EndScroll = windowHeight * 9;
+
+        // Map4 starts after Map3
+        const map4StartScroll = windowHeight * 9;
+        const map4EndScroll = windowHeight * 11;
+
+        // Map5 starts after Map4
+        const map5StartScroll = windowHeight * 11;
+        const map5EndScroll = windowHeight * 13;
+
+        // Map6 starts after Map5
+        const map6StartScroll = windowHeight * 13;
+        const map6EndScroll = windowHeight * 14.5;
+
+        // Credits starts much earlier and takes more space for proper animation
+        const creditsStartScroll = windowHeight * 13.5; // Start overlapping with Map6
+        const creditsEndScroll = windowHeight * 17; // Extended end for more scroll space
+
+        // Calculate Map1 progress
+        let map1Progress = 0;
+        if (scrollY >= map1StartScroll && scrollY <= map1EndScroll) {
+          map1Progress =
+            (scrollY - map1StartScroll) / (map1EndScroll - map1StartScroll);
+        } else if (scrollY > map1EndScroll && scrollY < map2StartScroll) {
+          map1Progress = 1;
+        } else if (scrollY >= map2StartScroll) {
+          // Fade out Map1 when Map2 starts
+          const fadeOutProgress = Math.min(
+            1,
+            (scrollY - map2StartScroll) / (windowHeight * 0.5),
+          );
+          map1Progress = 1 - fadeOutProgress;
+        }
+
+        // Calculate Map2 progress
+        let map2Progress = 0;
+        if (scrollY >= map2StartScroll && scrollY <= map2EndScroll) {
+          map2Progress =
+            (scrollY - map2StartScroll) / (map2EndScroll - map2StartScroll);
+        } else if (scrollY > map2EndScroll && scrollY < map3StartScroll) {
+          map2Progress = 1;
+        } else if (scrollY >= map3StartScroll) {
+          // Fade out Map2 when Map3 starts
+          const fadeOutProgress = Math.min(
+            1,
+            (scrollY - map3StartScroll) / (windowHeight * 0.5),
+          );
+          map2Progress = 1 - fadeOutProgress;
+        }
+
+        // Calculate Map3 progress
+        let map3Progress = 0;
+        if (scrollY >= map3StartScroll && scrollY <= map3EndScroll) {
+          map3Progress =
+            (scrollY - map3StartScroll) / (map3EndScroll - map3StartScroll);
+        } else if (scrollY > map3EndScroll && scrollY < map4StartScroll) {
+          map3Progress = 1;
+        } else if (scrollY >= map4StartScroll) {
+          // Fade out Map3 when Map4 starts
+          const fadeOutProgress = Math.min(
+            1,
+            (scrollY - map4StartScroll) / (windowHeight * 0.5),
+          );
+          map3Progress = 1 - fadeOutProgress;
+        }
+
+        // Calculate Map4 progress
+        let map4Progress = 0;
+        if (scrollY >= map4StartScroll && scrollY <= map4EndScroll) {
+          map4Progress =
+            (scrollY - map4StartScroll) / (map4EndScroll - map4StartScroll);
+        } else if (scrollY > map4EndScroll && scrollY < map5StartScroll) {
+          map4Progress = 1;
+        } else if (scrollY >= map5StartScroll) {
+          // Fade out Map4 when Map5 starts
+          const fadeOutProgress = Math.min(
+            1,
+            (scrollY - map5StartScroll) / (windowHeight * 0.5),
+          );
+          map4Progress = 1 - fadeOutProgress;
+        }
+
+        // Calculate Map5 progress
+        let map5Progress = 0;
+        if (scrollY >= map5StartScroll && scrollY <= map5EndScroll) {
+          map5Progress =
+            (scrollY - map5StartScroll) / (map5EndScroll - map5StartScroll);
+        } else if (scrollY > map5EndScroll && scrollY < map6StartScroll) {
+          map5Progress = 1;
+        } else if (scrollY >= map6StartScroll) {
+          // Fade out Map5 when Map6 starts
+          const fadeOutProgress = Math.min(
+            1,
+            (scrollY - map6StartScroll) / (windowHeight * 0.5),
+          );
+          map5Progress = 1 - fadeOutProgress;
+        }
+
+        // Calculate Map6 progress
+        let map6Progress = 0;
+        if (scrollY >= map6StartScroll && scrollY <= map6EndScroll) {
+          map6Progress =
+            (scrollY - map6StartScroll) / (map6EndScroll - map6StartScroll);
+        } else if (scrollY > map6EndScroll && scrollY < creditsStartScroll) {
+          map6Progress = 1;
+        } else if (scrollY >= creditsStartScroll) {
+          // Fade out Map6 when Credits starts
+          const fadeOutProgress = Math.min(
+            1,
+            (scrollY - creditsStartScroll) / (windowHeight * 0.5),
+          );
+          map6Progress = 1 - fadeOutProgress;
+        }
+
+        // Calculate Credits progress with enhanced animation range
+        let creditsProgress = 0;
+        if (scrollY >= creditsStartScroll && scrollY <= creditsEndScroll) {
+          creditsProgress =
+            (scrollY - creditsStartScroll) /
+            (creditsEndScroll - creditsStartScroll);
+          console.log("🎬 Credits calculation:", {
+            scrollY,
+            creditsStartScroll,
+            creditsEndScroll,
+            creditsProgress,
+          });
+        } else if (scrollY > creditsEndScroll) {
+          creditsProgress = 1;
+          console.log("🎬 Credits at 100%");
+        }
+
+        setMapProgress({
+          map1: Math.max(0, Math.min(1, map1Progress)),
+          map2: Math.max(0, Math.min(1, map2Progress)),
+          map3: Math.max(0, Math.min(1, map3Progress)),
+          map4: Math.max(0, Math.min(1, map4Progress)),
+          map5: Math.max(0, Math.min(1, map5Progress)),
+          map6: Math.max(0, Math.min(1, map6Progress)),
+          credits: Math.max(0, Math.min(1, creditsProgress)),
+        });
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [scrollMode, currentPhase]);
 
   return (
     <div className="globalinteriors-homepage">
-      {/* Phase-based component authorization */}
-      {currentPhase === "TOPFOLD" && <TopFold />}
-      {(currentPhase === "RESEARCH_TYPING" ||
-        currentPhase === "MAP_TRANSITIONS") && <ResearchQuestion />}
+      {/* Set document height for scrolling when unlocked */}
+      <div
+        style={{
+          height:
+            scrollMode === "UNLOCKED"
+              ? `${window.innerHeight * 18}px` // Increased for extended Credits section
+              : "100vh",
+          position: "relative",
+          background: "#EEEEEE",
+        }}
+      >
+        {/* TopFold Section - with smooth slide-up transition */}
+        {(currentPhase === "TOPFOLD" || isTransitioning) && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100vh",
+              zIndex: 200,
+              transform: isTransitioning
+                ? "translateY(-100vh)"
+                : "translateY(0)",
+              transition: isTransitioning
+                ? "transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+                : "none",
+            }}
+          >
+            <TopFold onScrollTrigger={handleTopFoldScroll} />
+          </div>
+        )}
 
-      {/* Persistent world map background - only visible during MAP_TRANSITIONS - extends through Map6 */}
-      {currentPhase === "MAP_TRANSITIONS" && (
-        <div className="persistent-world-map-background">
-          <img
-            className="world-map-bg"
-            src="/assets/images/world_map_final.svg"
-            alt="World map background"
-          />
-        </div>
-      )}
+        {/* Research Question Section - normal behavior, no changes */}
+        {(currentPhase === "RESEARCH" || currentPhase === "MAPS") && (
+          <ResearchQuestion />
+        )}
 
-      {/* Industry Standard: Force component remounting with keys for clean state */}
-      {currentPhase === "MAP_TRANSITIONS" && stage === 1 && (
-        <Map1
-          key="map1"
-          advancing={advancing}
-          onMount={() =>
-            console.log("📍 Map1 mounted with advancing=", advancing)
-          }
-        />
-      )}
-      {currentPhase === "MAP_TRANSITIONS" && stage === 2 && (
-        <Map2
-          key="map2"
-          advancing={advancing}
-          onMount={() =>
-            console.log("📍 Map2 mounted with advancing=", advancing)
-          }
-        />
-      )}
-      {currentPhase === "MAP_TRANSITIONS" && stage === 3 && (
-        <>
-          {console.log(
-            "🔍 DIAGNOSTIC: Attempting to render Map3, stage=",
-            stage,
-            "advancing=",
-            advancing,
-          )}
-          <Map3
-            key="map3"
-            advancing={advancing}
-            onMount={() =>
-              console.log("📍 Map3 mounted with advancing=", advancing)
-            }
+        {/* Maps Section - layered over ResearchQuestion */}
+        {currentPhase === "MAPS" && (
+          <>
+            {/* World Map Background - persistent */}
+            <div
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100vh",
+                zIndex: 15,
+                opacity: Math.min(
+                  0.6,
+                  Math.max(
+                    0,
+                    (scrollY - window.innerHeight * 2.5) /
+                      (window.innerHeight * 0.5),
+                  ),
+                ),
+                pointerEvents: "none",
+                transition: "opacity 0.3s ease",
+              }}
+            >
+              <img
+                src="/assets/images/world_map_final.svg"
+                alt="World map background"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            </div>
+
+            {/* Map1 Component */}
+            {mapProgress.map1 > 0 && (
+              <div
+                style={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100vh",
+                  zIndex: 20,
+                  pointerEvents: "none",
+                }}
+              >
+                <Map1
+                  scrollProgress={mapProgress.map1}
+                  isActive={mapProgress.map1 > 0.1}
+                />
+              </div>
+            )}
+
+            {/* Map2 Component */}
+            {mapProgress.map2 > 0 && (
+              <div
+                style={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100vh",
+                  zIndex: 25,
+                  pointerEvents: "none",
+                }}
+              >
+                <Map2
+                  scrollProgress={mapProgress.map2}
+                  isActive={mapProgress.map2 > 0.1}
+                />
+              </div>
+            )}
+
+            {/* Map3 Component */}
+            {mapProgress.map3 > 0 && (
+              <div
+                style={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100vh",
+                  zIndex: 30,
+                  pointerEvents: "none",
+                }}
+              >
+                <Map3
+                  scrollProgress={mapProgress.map3}
+                  isActive={mapProgress.map3 > 0.1}
+                />
+              </div>
+            )}
+
+            {/* Map4 Component */}
+            {mapProgress.map4 > 0 && (
+              <div
+                style={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100vh",
+                  zIndex: 35,
+                  pointerEvents: "none",
+                }}
+              >
+                <Map4
+                  scrollProgress={mapProgress.map4}
+                  isActive={mapProgress.map4 > 0.1}
+                />
+              </div>
+            )}
+
+            {/* Map5 Component */}
+            {mapProgress.map5 > 0 && (
+              <div
+                style={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100vh",
+                  zIndex: 40,
+                  pointerEvents: "none",
+                }}
+              >
+                <Map5
+                  scrollProgress={mapProgress.map5}
+                  isActive={mapProgress.map5 > 0.1}
+                />
+              </div>
+            )}
+
+            {/* Map6 Component */}
+            {mapProgress.map6 > 0 && (
+              <div
+                style={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100vh",
+                  zIndex: 45,
+                  pointerEvents: "none",
+                }}
+              >
+                <Map6
+                  scrollProgress={mapProgress.map6}
+                  isActive={mapProgress.map6 > 0.1}
+                />
+              </div>
+            )}
+
+            {/* Credits Component - Enhanced with proper interaction and positioning */}
+            {mapProgress.credits > 0 && (
+              <div
+                style={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100vh",
+                  zIndex: 60, // Higher z-index to ensure it's on top
+                  pointerEvents: mapProgress.credits > 0.3 ? "auto" : "none", // Enable interaction when visible
+                }}
+              >
+                <Credits
+                  scrollProgress={mapProgress.credits}
+                  isActive={mapProgress.credits > 0.05}
+                />
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Additional scroll space for credits - extended */}
+        {scrollMode === "UNLOCKED" && currentPhase === "MAPS" && (
+          <div
+            style={{
+              position: "absolute",
+              top: `${window.innerHeight * 18}px`,
+              width: "100%",
+              height: `${window.innerHeight * 2}px`, // Extra scroll space
+              background: "#EEEEEE",
+              zIndex: 5,
+            }}
           />
-        </>
-      )}
-      {currentPhase === "MAP_TRANSITIONS" && stage === 4 && (
-        <Map4
-          key="map4"
-          advancing={advancing}
-          onMount={() =>
-            console.log("📍 Map4 mounted with advancing=", advancing)
-          }
-        />
-      )}
-      {currentPhase === "MAP_TRANSITIONS" && stage === 5 && (
-        <Map5
-          key="map5"
-          advancing={advancing}
-          onMount={() =>
-            console.log("📍 Map5 mounted with advancing=", advancing)
-          }
-        />
-      )}
-      {currentPhase === "MAP_TRANSITIONS" && stage === 6 && (
-        <Map6
-          key="map6"
-          advancing={advancing}
-          onMount={() =>
-            console.log("📍 Map6 mounted with advancing=", advancing)
-          }
-        />
-      )}
-      {currentPhase === "MAP_TRANSITIONS" && stage === 7 && (
-        <Credits
-          key="credits"
-          visible={true}
-          scrollProgress={creditsScrollProgress}
-          onMount={() => console.log("📍 Credits mounted")}
-        />
-      )}
+        )}
+      </div>
     </div>
   );
 }

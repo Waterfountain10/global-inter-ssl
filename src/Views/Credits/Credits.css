@@ -1,287 +1,335 @@
+/* Credits.css - Enhanced with proper slide-up animation */
 .credits-container {
-  position: fixed; /* Fixed positioning for smooth slide-up */
-  top: 0;
-  left: 0;
-  background: #EEEEEE;
-  width: 100%;
-  height: 100vh;
-  z-index: 50; /* Maximum priority above everything */
-  padding: 120px 0 80px;
-  font-family: 'Montserrat', 'Helvetica Neue', sans-serif;
-  overflow-y: auto; /* Allow scrolling within credits */
-  /* Initial state: positioned below viewport */
-  transform: translateY(100vh);
-  transition: transform 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    pointer-events: auto;
 }
 
-.credits-container.visible {
-  /* Slide up into view with smooth transition */
-  transform: translateY(0);
+/* Scroll-driven container states */
+.credits-container.scroll-driven {
+    will-change: opacity, transform;
 }
 
-.credits-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 60px 48px;
-  position: relative;
-  z-index: 51; /* Above container */
-  background: #FFFFFF; /* Strong white background for maximum contrast */
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1); /* Added shadow for depth */
-  /* Initial content state - slightly scaled down */
-  transform: scale(0.95);
-  opacity: 0;
-  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.6s; /* Delayed for sequential animation */
+.credits-container.active {
+    z-index: 50; /* Highest z-index like Map6 but higher */
 }
 
-/* Content appears after container slide-up */
-.credits-container.visible .credits-content {
-  transform: scale(1);
-  opacity: 1;
+/* Credits overlay - enhanced for better visibility */
+.credits-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    will-change: opacity, transform;
+    background: #eeeeee; /* Solid background for better readability */
 }
 
+/* Remove static animations in favor of scroll-driven ones */
+.credits-overlay.scroll-responsive {
+    animation: none;
+}
+
+/* Credits content bubble - enhanced visibility and positioning */
+.credits-content-bubble {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.98); /* Much less transparent */
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.15),
+        0 8px 25px rgba(0, 0, 0, 0.1);
+    z-index: 21;
+    will-change: opacity, transform;
+    font-family: "Montserrat", "Helvetica Neue", sans-serif;
+    max-width: 1200px;
+    width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 60px 48px;
+}
+
+/* Remove static animations for scroll-responsive elements */
+.credits-content-bubble.scroll-responsive {
+    animation: none;
+}
+
+/* Enhanced scroll styling for credits content */
+.credits-content-bubble::-webkit-scrollbar {
+    width: 8px;
+}
+
+.credits-content-bubble::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+}
+
+.credits-content-bubble::-webkit-scrollbar-thumb {
+    background: rgba(255, 57, 92, 0.3);
+    border-radius: 4px;
+}
+
+.credits-content-bubble::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 57, 92, 0.5);
+}
+
+/* Grid layout for credits content */
 .credits-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 80px;
-  margin-bottom: 80px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 40px;
+    margin-bottom: 40px;
 }
 
 .credits-section {
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
 }
 
+/* Typography styles - enhanced contrast */
 .credits-heading {
-  font-size: 2.5rem !important;
-  font-weight: 900 !important;
-  color: #000000 !important; /* Maximum contrast black */
-  margin-bottom: 32px !important;
-  letter-spacing: -1px !important;
-  font-family: 'Montserrat', 'Helvetica Neue', sans-serif !important;
-  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8) !important; /* White text shadow for extra visibility */
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: #000000;
+    margin-bottom: 20px;
+    letter-spacing: -0.5px;
+    font-family: "Montserrat", "Helvetica Neue", sans-serif;
 }
 
 .credits-text {
-  font-size: 1rem !important;
-  line-height: 1.6 !important;
-  color: #000000 !important; /* Maximum contrast black */
-  margin-bottom: 20px !important;
-  font-weight: 400 !important;
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #222222; /* Darker for better contrast */
+    margin-bottom: 16px;
+    font-weight: 400;
 }
 
 /* Team Section Styles */
 .team-org {
-  font-size: 1.5rem !important;
-  font-weight: 700 !important;
-  color: #000000 !important;
-  margin: 32px 0 16px 0 !important;
-  letter-spacing: -0.5px !important;
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #000000;
+    margin: 24px 0 12px 0;
+    letter-spacing: -0.3px;
 }
 
 .team-org:first-of-type {
-  margin-top: 0 !important;
+    margin-top: 0;
 }
 
 .team-member {
-  display: flex !important;
-  flex-direction: column !important;
-  margin-bottom: 12px !important;
-  visibility: visible !important;
-  opacity: 1 !important;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 8px;
 }
 
 .member-name {
-  font-size: 1rem !important;
-  font-weight: 600 !important;
-  color: #000000 !important;
-  line-height: 1.3 !important;
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #000000;
+    line-height: 1.3;
 }
 
 .member-role {
-  font-size: 0.9rem !important;
-  color: #666666 !important;
-  font-weight: 400 !important;
-  margin-top: 2px !important;
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
+    font-size: 0.85rem;
+    color: #555555; /* Slightly darker for better readability */
+    font-weight: 400;
+    margin-top: 2px;
 }
 
 /* Publications Section Styles */
 .publication-authors {
-  font-size: 1rem !important;
-  color: #000000 !important;
-  margin-bottom: 8px !important;
-  line-height: 1.5 !important;
-  font-weight: 400 !important;
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
+    font-size: 0.95rem;
+    color: #000000;
+    margin-bottom: 6px;
+    line-height: 1.4;
+    font-weight: 400;
 }
 
 .publication-title {
-  font-size: 1rem !important;
-  color: #FF395C !important;
-  text-decoration: underline !important;
-  margin-bottom: 8px !important;
-  display: block !important;
-  line-height: 1.4 !important;
-  font-weight: 500 !important;
-  visibility: visible !important;
-  opacity: 1 !important;
+    font-size: 0.95rem;
+    color: #ff395c;
+    text-decoration: underline;
+    margin-bottom: 6px;
+    display: block;
+    line-height: 1.3;
+    font-weight: 500;
+    transition: color 0.3s ease;
 }
 
 .publication-title:hover {
-  color: #e62e50 !important;
+    color: #e62e50;
 }
 
 .publication-venue {
-  font-size: 1rem !important;
-  color: #000000 !important;
-  font-weight: 600 !important;
-  margin-bottom: 40px !important;
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
+    font-size: 1rem;
+    color: #000000;
+    font-weight: 600;
+    margin-bottom: 40px;
 }
 
 .press-heading {
-  margin-top: 40px !important;
+    margin-top: 40px;
 }
 
 .press-download {
-  font-size: 1rem !important;
-  color: #FF395C !important;
-  text-decoration: underline !important;
-  margin-bottom: 16px !important;
-  display: block !important;
-  font-weight: 500 !important;
-  visibility: visible !important;
-  opacity: 1 !important;
+    font-size: 1rem;
+    color: #ff395c;
+    text-decoration: underline;
+    margin-bottom: 16px;
+    display: block;
+    font-weight: 500;
+    transition: color 0.3s ease;
 }
 
 .press-download:hover {
-  color: #e62e50 !important;
+    color: #e62e50;
 }
 
 .press-usage {
-  font-size: 1rem !important;
-  color: #000000 !important;
-  margin-bottom: 12px !important;
-  line-height: 1.5 !important;
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
+    font-size: 1rem;
+    color: #000000;
+    margin-bottom: 12px;
+    line-height: 1.5;
 }
 
 .press-conditions {
-  padding-left: 20px !important;
-  margin: 0 !important;
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
+    padding-left: 20px;
+    margin: 0;
 }
 
 .press-conditions li {
-  font-size: 1rem !important;
-  color: #000000 !important;
-  margin-bottom: 8px !important;
-  line-height: 1.5 !important;
-  display: list-item !important;
-  visibility: visible !important;
-  opacity: 1 !important;
+    font-size: 1rem;
+    color: #000000;
+    margin-bottom: 8px;
+    line-height: 1.5;
 }
 
-/* Contact Section Styles - Single Column Layout */
+/* Contact Section Styles */
 .contact-section {
-  display: flex;
-  flex-direction: column;
-  border-top: 2px solid #ddd;
-  padding-top: 40px;
+    display: flex;
+    flex-direction: column;
+    border-top: 2px solid #ddd;
+    padding-top: 40px;
+    margin-top: 40px;
 }
 
 .contact-info {
-  width: 100%;
+    width: 100%;
 }
 
 .contact-label {
-  font-size: 1rem;
-  color: #333333;
-  margin-bottom: 8px;
+    font-size: 1rem;
+    color: #333333;
+    margin-bottom: 8px;
 }
 
 .contact-email {
-  font-size: 1rem;
-  color: #FF395C;
-  text-decoration: none;
-  font-weight: 500;
-  margin-bottom: 40px;
-  display: block;
+    font-size: 1rem;
+    color: #ff395c;
+    text-decoration: none;
+    font-weight: 500;
+    margin-bottom: 40px;
+    display: block;
+    transition: all 0.3s ease;
 }
 
 .contact-email:hover {
-  text-decoration: underline;
-  color: #e62e50;
+    text-decoration: underline;
+    color: #e62e50;
 }
 
 .lab-logo {
-  margin-bottom: 16px;
+    margin-bottom: 16px;
 }
 
 .lab-logo img {
-  height: 60px;
-  margin-bottom: 0;
+    height: 60px;
+    margin-bottom: 0;
 }
 
 .accessibility-link {
-  font-size: 0.9rem;
-  color: #999999;
-  text-decoration: none;
+    font-size: 0.9rem;
+    color: #999999;
+    text-decoration: none;
+    transition: all 0.3s ease;
 }
 
 .accessibility-link:hover {
-  text-decoration: underline;
+    text-decoration: underline;
+    color: #666666;
+}
+
+/* Enhanced highlight for better readability */
+.highlight {
+    color: #ff395c;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(255, 57, 92, 0.1);
+}
+
+/* Performance optimizations */
+.credits-container * {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-  .credits-grid {
-    grid-template-columns: 1fr;
-    gap: 60px;
-  }
-  
-  .credits-content {
-    padding: 0 32px;
-  }
+    .credits-grid {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+
+    .credits-content-bubble {
+        padding: 40px 32px;
+        width: 95%;
+        max-height: 90vh;
+    }
 }
 
 @media (max-width: 768px) {
-  .credits-container {
-    padding: 80px 0 60px;
-  }
-  
-  .credits-content {
-    padding: 0 24px;
-  }
-  
-  .credits-heading {
-    font-size: 2rem;
-  }
-  
-  .credits-grid {
-    gap: 40px;
-  }
+    .credits-content-bubble {
+        padding: 32px 24px;
+        width: 95%;
+        max-height: 90vh;
+    }
+
+    .credits-heading {
+        font-size: 1.6rem;
+    }
+
+    .credits-grid {
+        gap: 24px;
+    }
+
+    .credits-text,
+    .publication-authors,
+    .publication-title,
+    .publication-venue,
+    .press-download,
+    .press-usage,
+    .press-conditions li,
+    .contact-label,
+    .contact-email {
+        font-size: 0.9rem;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .credits-container {
+        animation: none;
+    }
+
+    .credits-content-bubble {
+        transition: none;
+    }
 }

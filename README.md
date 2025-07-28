@@ -1,70 +1,190 @@
-# Getting Started with Create React App
+# Global Interiors Web App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is the interactive React-based web experience for the Global Interiors project (MIT Senseable Lab).
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 1. What is this?
 
-### `npm start`
+- **Frontend framework:** React (Create React App)
+- **Purpose:** Displays interactive world maps, research questions, and credits with scroll-based transitions.
+- **Deployment:** MIT’s internal server (`senseable.mit.edu`) via `manager.py`.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 2. Prerequisites
 
-### `npm test`
+You will need:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- **MIT Secure Wi-Fi** (required for SSH to the lab server)
+- **Node.js + npm** installed (for local testing)
+- **Git** (optional, if pulling from a repo rather than zip)
+- **Server access credentials** (provided: `fduarte@senseable.mit.edu`)
 
-### `npm run build`
+### How to check prerequisites
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+node -v   # should print something like v20.x.x
+npm -v    # should print something like 10.x.x
+ssh fduarte@senseable.mit.edu  # should prompt for password
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+If `npm` is missing:
+- Install via [Node.js LTS](https://nodejs.org/) or Homebrew (`brew install node`).
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+## 3. Local Setup (Testing on Your Computer)
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### 1. Extract project
+If you received a zip, unzip it somewhere (e.g., Desktop).
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### 2. Open Terminal and navigate to folder
+```bash
+cd ~/Documents/personal-coding/globalinteriors-main
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### 3. Install dependencies
+```bash
+npm install
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### 4. Start local dev server
+```bash
+npm start
+```
+- Opens [http://localhost:3000](http://localhost:3000) in your browser.
+- Updates auto-reload as you change files.
 
-## Learn More
+---
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 4. Building for Production
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Before deploying to MIT server, you must build the static files:
 
-### Code Splitting
+```bash
+npm run build
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+This creates a `build/` folder containing:
+```
+index.html
+assets/
+static/
+...
+```
 
-### Analyzing the Bundle Size
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## 5. Deploying to MIT Server
 
-### Making a Progressive Web App
+> **Important:** MIT server expects `index.html` at root (not inside `/public` or `/build`).
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### Steps
 
-### Advanced Configuration
+1. **Connect to MIT Secure Wi-Fi**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+2. **SSH into server**
+```bash
+ssh fduarte@senseable.mit.edu
+```
+Password: `Senseable@77`
 
-### Deployment
+3. **Run deployment manager**
+```bash
+cd /home/deployer/
+sudo ./manager.py
+```
+Password again: `Senseable@77`
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+4. **Select option to add repo**
+- Press `1`
+- Enter repo name (e.g., `global-interiors`)
+- Enter URL (can leave blank if uploading manually)
+- Press Enter
 
-### `npm run build` fails to minify
+5. **Upload build files**
+On your local machine (NOT in SSH session):
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```bash
+scp -r build/* fduarte@senseable.mit.edu:/home/deployer/global-interiors/
+```
+
+This copies everything inside `build/` (including `index.html`) to the server folder.
+
+6. **Verify**
+- Visit the lab’s internal URL for the project
+- Confirm `index.html` loads and assets appear correctly
+
+---
+
+## 6. Folder Structure (Simplified)
+
+```
+src/
+  Views/
+    Home/
+    Map1/
+    Map2/
+    ...
+  components/
+  config/
+public/
+  assets/images/
+  assets/videos/
+```
+
+- **`public/assets/`**: All static images/videos
+- **`src/Views/`**: Each map or page is its own folder (CSS + JS together)
+
+---
+
+## 7. Common Issues
+
+### **npm: command not found**
+- Install Node.js: `brew install node` (macOS) or download from [nodejs.org](https://nodejs.org)
+
+### **Wrong import paths**
+- Always use `./Views/...` or enable absolute imports via `jsconfig.json`.
+
+### **index.html not found on server**
+- Make sure you uploaded files from `build/`, not `public/`.
+
+### **Permission denied when running manager.py**
+- Use `sudo ./manager.py` and enter provided password.
+
+---
+
+## 8. Notes
+
+- Do **NOT** push to MIT GitHub — only deploy via `manager.py` and `scp`.
+- If updating code, always run `npm run build` before uploading.
+- Only modify files inside `src/` or `public/assets/`.
+
+---
+
+## 9. Quick Commands (Cheat Sheet)
+
+### Local test
+```bash
+npm install
+npm start
+```
+
+### Build for deploy
+```bash
+npm run build
+```
+
+### Upload to server
+```bash
+scp -r build/* fduarte@senseable.mit.edu:/home/deployer/global-interiors/
+```
+
+---
+
+## 10. Contacts
+
+For credentials or server issues: **[Lab contact / supervisor]**
+
+For code-related questions: **[Your name]**
